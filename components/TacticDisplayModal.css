@@ -1,0 +1,217 @@
+.tactic-display-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(30, 31, 38, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.tactic-display-modal {
+  background-color: var(--light-gray);
+  padding: 1.75rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  animation: modalAppear 0.3s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: var(--teal) var(--light-gray);
+  border: 1px solid var(--border-dark);
+}
+
+.tactic-display-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tactic-display-modal::-webkit-scrollbar-track {
+  background: var(--light-gray);
+  border-radius: 8px;
+}
+
+.tactic-display-modal::-webkit-scrollbar-thumb {
+  background-color: var(--teal);
+  border-radius: 8px;
+}
+
+.tactic-display-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.tactic-display-header h3 {
+  color: var(--navy);
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.tactic-display-close {
+  background: none;
+  border: none;
+  color: var(--navy);
+  font-size: 1.75rem;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.tactic-display-close:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.tactic-display-content {
+  color: var(--navy);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.tactic-display-description {
+  background-color: var(--navy);
+  padding: 1.25rem;
+  border-radius: 8px;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--teal);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  line-height: 1.6;
+}
+
+.tactic-display-lineup {
+  margin-top: 1.5rem;
+  background-color: var(--navy);
+  padding: 1.25rem;
+  border-radius: 8px;
+  color: var(--text-light);
+  border-left: 4px solid var(--orange);
+}
+
+.tactic-display-lineup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tactic-display-lineup-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--text-light);
+}
+
+.tactic-display-lineup-classification {
+  background-color: var(--orange);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.tactic-display-players {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.tactic-display-player {
+  background-color: var(--navy-light);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tactic-display-player-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.tactic-display-player-classification {
+  background-color: var(--teal);
+  color: white;
+  padding: 0.15rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.no-description-message {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  padding: 0.75rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tactic-display-modal {
+    padding: 1.25rem;
+    width: 95%;
+  }
+
+  .tactic-display-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .tactic-display-players {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .tactic-display-modal {
+    padding: 1rem;
+  }
+
+  .tactic-display-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .tactic-display-players {
+    grid-template-columns: 1fr;
+  }
+}
+

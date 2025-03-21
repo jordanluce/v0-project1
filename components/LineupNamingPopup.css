@@ -1,0 +1,231 @@
+.naming-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(30, 31, 38, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.naming-popup-content {
+  background-color: var(--light-gray);
+  padding: 1.75rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  animation: popup-appear 0.3s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: var(--teal) var(--light-gray);
+  border: 1px solid var(--border-dark);
+}
+
+.naming-popup-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.naming-popup-content::-webkit-scrollbar-track {
+  background: var(--light-gray);
+  border-radius: 8px;
+}
+
+.naming-popup-content::-webkit-scrollbar-thumb {
+  background-color: var(--teal);
+  border-radius: 8px;
+}
+
+@keyframes popup-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.naming-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.naming-popup-header h3 {
+  color: var(--navy);
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.lineup-preview {
+  background-color: var(--navy);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: var(--text-light);
+}
+
+.lineup-preview-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.lineup-preview-classification {
+  background-color: var(--orange);
+  color: white;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: none;
+}
+
+.lineup-preview-players {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lineup-preview-player {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: var(--navy-light);
+  border-radius: 6px;
+  transition: transform 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lineup-preview-player:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.player-number {
+  background-color: var(--orange);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+}
+
+.player-name {
+  flex: 1;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.player-classification {
+  background-color: var(--orange);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+}
+
+.form-group {
+  margin-bottom: 1.75rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--navy);
+  font-size: 1rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-dark);
+  background-color: #ffffff;
+  color: var(--text-dark);
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  border-color: var(--teal);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.3);
+}
+
+.naming-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.cancel-button {
+  background-color: transparent;
+  border: 1px solid var(--border-dark);
+  color: var(--navy);
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: rgba(41, 161, 156, 0.1);
+  transform: translateY(-2px);
+}
+
+.save-button {
+  background-color: var(--orange);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.save-button:hover {
+  background-color: var(--orange-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 480px) {
+  .naming-popup-content {
+    padding: 1.25rem;
+    width: 95%;
+  }
+
+  .naming-popup-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .cancel-button,
+  .save-button {
+    width: 100%;
+  }
+}
+

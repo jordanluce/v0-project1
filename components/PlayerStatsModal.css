@@ -1,0 +1,173 @@
+.player-stats-modal {
+  max-width: 550px;
+  background-color: var(--light-gray);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-dark);
+}
+
+.player-stats-content {
+  padding: 1.5rem 1rem;
+}
+
+.player-info {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--navy);
+  border-radius: 8px;
+  border: none;
+  border-left: 4px solid var(--orange);
+  color: var(--text-light);
+}
+
+/* Improve player classification contrast */
+.player-classification {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  background-color: var(--navy);
+  padding: 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  border: none;
+  color: var(--text-light);
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Improve stat name contrast */
+.stat-name {
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  color: var(--text-light);
+}
+
+.stat-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.stat-button.increment {
+  background-color: var(--teal);
+  color: white;
+}
+
+.stat-button.increment:hover:not(:disabled) {
+  background-color: var(--teal-dark);
+}
+
+.stat-button.decrement {
+  background-color: var(--orange);
+  color: white;
+}
+
+.stat-button.decrement:hover:not(:disabled) {
+  background-color: var(--orange-dark);
+}
+
+.stat-button:disabled {
+  background-color: var(--gray-dark);
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+/* Improve stat value contrast */
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: bold;
+  min-width: 36px;
+  text-align: center;
+  color: var(--text-light);
+}
+
+.stat-value.foul-warning {
+  color: var(--warning);
+}
+
+.stat-value.fouled-out {
+  color: var(--error);
+  font-weight: bold;
+}
+
+/* Add styles for foul warnings and alerts */
+.foul-alert {
+  margin: 0.75rem 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+}
+
+/* Improve foul alert contrast */
+.foul-warning-alert {
+  background-color: rgba(255, 193, 7, 0.2);
+  border-left: 4px solid var(--warning);
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.fouled-out-alert {
+  background-color: rgba(244, 67, 54, 0.2);
+  border-left: 4px solid var(--error);
+  color: var(--error);
+  font-weight: 600;
+}
+
+.modal-footer {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 1rem;
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .player-stats-modal {
+    width: 95%;
+    max-width: none;
+  }
+
+  .player-stats-content {
+    padding: 1rem 0.75rem;
+  }
+}
+

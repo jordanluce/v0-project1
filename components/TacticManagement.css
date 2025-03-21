@@ -1,0 +1,86 @@
+.tactics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tactic-card {
+  background-color: var(--navy);
+  border-radius: 8px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--orange);
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  color: var(--text-light);
+}
+
+.tactic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tactic-card.active {
+  border-color: var(--teal);
+  background-color: rgba(41, 161, 156, 0.1);
+  box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.2);
+}
+
+.tactic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tactic-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-light);
+}
+
+.lineup-badge {
+  background-color: var(--teal);
+  color: white;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+}
+
+.tactic-description {
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  background-color: var(--navy-light);
+  padding: 1rem;
+  border-radius: 6px;
+  line-height: 1.5;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tactic-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .tactics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tactic-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

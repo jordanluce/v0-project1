@@ -1,0 +1,228 @@
+.classification-bar-container {
+  background-color: var(--navy);
+  padding: 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-left: 4px solid var(--teal);
+  color: var(--text-light);
+}
+
+.classification-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.classification-label,
+.classification-limit {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.limit-label {
+  margin-right: 0.25rem;
+}
+
+.classification-value {
+  font-weight: bold;
+  color: var(--orange);
+  margin-left: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.classification-bar {
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.classification-progress {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.classification-warning {
+  color: var(--error);
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-radius: 4px;
+  border: none;
+  border-left: 3px solid var(--error);
+}
+
+/* New styles for bonus indicators */
+.bonus-value {
+  display: inline-block;
+  background-color: #ffd700;
+  color: #000; /* Changed from white to black for better contrast */
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 4px;
+  font-size: 0.85rem;
+}
+
+.bonus-indicator {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 193, 7, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bonus-indicator:hover {
+  background-color: rgba(255, 193, 7, 0.3);
+}
+
+.adjusted-limit {
+  color: white;
+  background-color: var(--teal);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+/* Bonus details panel */
+.bonus-details {
+  background-color: var(--navy-light);
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 0.75rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bonus-details h4 {
+  color: #ffc107;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.bonus-details ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bonus-details li {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.bonus-type {
+  font-weight: 600;
+  min-width: 100px;
+}
+
+.bonus-count {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bonus-amount {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.bonus-total {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.bonus-summary {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bonus-total-value {
+  color: #4caf50;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.max-cap-note {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: space-between;
+}
+
+.max-cap-value {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+.bonus-hint {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin-top: 0.5rem;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.bonus-hint:hover {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .classification-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .classification-bar-container {
+    padding: 1rem;
+  }
+
+  .bonus-details li {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+
+  .bonus-type {
+    min-width: auto;
+    margin-bottom: 0.25rem;
+  }
+}
+
