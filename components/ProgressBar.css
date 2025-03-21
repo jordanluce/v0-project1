@@ -1,0 +1,961 @@
+/* Progress Bar Styles - Redesigned with Typography Focus */
+.progress-container {
+  margin-bottom: 1rem;
+  width: 100%;
+  background-color: var(--navy);
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  color: var(--text-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal) 0%, var(--orange) 100%);
+  opacity: 0.8;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.progress-title {
+  color: var(--text-light);
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  position: relative;
+  letter-spacing: 0.5px;
+}
+
+.progress-title-accent {
+  display: inline-block;
+  width: 3px;
+  height: 18px;
+  background: linear-gradient(to bottom, var(--teal), var(--orange));
+  margin-right: 10px;
+  border-radius: 2px;
+}
+
+/* Improve progress percentage contrast */
+.progress-percentage {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+  color: white;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-percentage::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  animation: shimmer 2s infinite;
+  transform: skewX(-20deg);
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+/* Add a transition for smooth UI adjustments when steps are added/removed */
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Ensure the progress line adjusts properly when steps are removed */
+.progress-line {
+  position: absolute;
+  top: 25px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--dark-gray);
+  z-index: 0;
+  transition: all 0.3s ease;
+}
+
+.progress-line-fill {
+  height: 100%;
+  background-color: var(--teal);
+  transition: width 0.5s ease;
+}
+
+.progress-step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 25%;
+}
+
+.step-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  padding: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-light);
+}
+
+.step-button:hover:not(.locked) .step-circle {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(41, 161, 156, 0.6);
+}
+
+.step-button.locked {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Typography-focused step circles */
+.step-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--navy-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  color: var(--text-light);
+  font-weight: bold;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.step-circle::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* Add a more pronounced glow effect to active steps */
+.step-circle.active {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  animation: pulse 2.5s infinite cubic-bezier(0.66, 0, 0, 1);
+  box-shadow: 0 4px 15px rgba(41, 161, 156, 0.6);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(41, 161, 156, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(41, 161, 156, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(41, 161, 156, 0);
+  }
+}
+
+/* Add a subtle glow effect to completed steps */
+.step-circle.completed {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  box-shadow: 0 4px 15px rgba(41, 161, 156, 0.4);
+}
+
+.step-circle.locked {
+  background-color: var(--navy-light);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Typography-focused step text */
+.step-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.step-circle.completed .step-text {
+  font-size: 2rem;
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Strong typography for step labels */
+.step-label {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  text-align: center;
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 0.25rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.step-label.active {
+  color: var(--teal);
+  font-weight: 800;
+  font-size: 1.05rem;
+  text-shadow: 0 0 10px rgba(41, 161, 156, 0.3);
+  letter-spacing: 1.2px;
+}
+
+.step-label.completed {
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.step-label.locked {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Improve step description contrast */
+.step-description {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  margin-top: 0.35rem;
+  max-width: 120px;
+  line-height: 1.4;
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 400;
+}
+
+.step-description.active {
+  color: rgba(41, 161, 156, 0.9);
+  font-weight: 500;
+}
+
+.step-description.completed {
+  color: rgba(41, 161, 156, 0.9);
+}
+
+.step-description.locked {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Improve step status contrast */
+.step-status {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  margin-top: 0.75rem;
+  font-weight: 600;
+  border: none;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.step-status.completed {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+}
+
+.step-status.active {
+  background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
+  animation: blink 2.5s infinite;
+}
+
+.step-status.locked {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  box-shadow: none;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* Add styles for the collapsible dashboard */
+.summary-container {
+  margin-bottom: 1rem;
+  width: 100%;
+  background-color: var(--navy);
+  border-radius: 10px;
+  padding: 0; /* Remove default padding to control it based on state */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  color: var(--text-light);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease, transform 0.5s ease, height 0.3s ease;
+  height: auto;
+}
+
+/* Add a fade-out animation for smooth transition when removing the component */
+.summary-container.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.summary-container.fade-out {
+  animation: fadeOut 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.summary-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal) 0%, var(--orange) 100%);
+  opacity: 0.8;
+}
+
+/* Make the header more compact */
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  padding: 0.75rem 1.25rem; /* Consistent padding regardless of state */
+  transition: background-color 0.2s ease;
+}
+
+.summary-header:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.summary-header:active {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.summary-title {
+  color: var(--text-light);
+  font-size: 1.1rem; /* Slightly smaller font for more compact look */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  position: relative; /* Ensure this is set for tooltip positioning */
+  letter-spacing: 0.5px;
+}
+
+.summary-title-accent {
+  display: inline-block;
+  width: 3px;
+  height: 16px; /* Slightly smaller accent */
+  background: linear-gradient(to bottom, var(--teal), var(--orange));
+  margin-right: 10px;
+  border-radius: 2px;
+}
+
+.summary-toggle-icon {
+  margin-left: 10px;
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.summary-toggle-icon.expanded {
+  transform: rotate(0deg);
+}
+
+.summary-toggle-icon.collapsed {
+  transform: rotate(180deg);
+}
+
+/* Update the summary-percentage styles to prevent text wrapping */
+.summary-percentage {
+  background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
+  color: white;
+  padding: 0.25rem 0.65rem; /* Slightly smaller padding */
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem; /* Slightly smaller font */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  border: none;
+  position: relative;
+  overflow: hidden;
+  margin-left: 1rem;
+  white-space: nowrap; /* Add this to prevent text wrapping */
+  display: inline-flex; /* Add this to ensure inline layout */
+  align-items: center; /* Add this to vertically center the text */
+}
+
+/* Content container for the collapsible section */
+.summary-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease, padding 0.3s ease;
+  max-height: 500px; /* Adjust based on your content */
+  opacity: 1;
+  transform: translateY(0);
+  padding: 0 1.25rem 1.25rem 1.25rem; /* Padding for expanded state */
+}
+
+.collapsed .summary-content {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.expanded .summary-content {
+  max-height: 500px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Adjust container padding when collapsed */
+.summary-container.collapsed {
+  /* No additional padding needed - the header padding is sufficient */
+}
+
+.summary-container.expanded {
+  /* No additional padding needed - content has its own padding */
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Update the summary-item to remove hover effects and make it more touch-friendly */
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 1rem 0.75rem;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.summary-item:active {
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: background-color 0.1s ease;
+}
+
+.summary-item-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-light);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem; /* Increased spacing */
+  text-align: center;
+}
+
+.summary-connector {
+  width: 2px;
+  height: 15px;
+  background-color: var(--teal);
+  margin-bottom: 0.75rem; /* Increased spacing */
+}
+
+/* Remove hover-specific styles for the summary circle */
+.summary-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 0.5rem;
+}
+
+/* Remove the hover-based shimmer effect */
+.summary-circle::before {
+  display: none;
+}
+
+.summary-value {
+  font-size: 1.4rem; /* Increased font size */
+  font-weight: 800; /* Increased font weight */
+  color: white;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Added text shadow for better readability */
+}
+
+/* Animation for summary items to appear one by one */
+.summary-container.animate-in .summary-item:nth-child(1) {
+  animation: fadeInUp 0.5s ease forwards 0.1s;
+}
+
+.summary-container.animate-in .summary-item:nth-child(2) {
+  animation: fadeInUp 0.5s ease forwards 0.2s;
+}
+
+.summary-container.animate-in .summary-item:nth-child(3) {
+  animation: fadeInUp 0.5s ease forwards 0.3s;
+}
+
+.summary-container.animate-in .summary-item:nth-child(4) {
+  animation: fadeInUp 0.5s ease forwards 0.4s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Remove the plus icon that was only visible on hover */
+.summary-plus {
+  display: none;
+}
+
+/* Create a new mobile-friendly add button that's always visible */
+.summary-add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--orange);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.summary-add-button:active {
+  transform: scale(0.9);
+  background-color: var(--orange-dark);
+}
+
+/* Create a container for the value and add button to be side by side */
+.summary-value-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* Update the summary value to work with the new container */
+
+/* Add a label for the add button for better accessibility */
+.summary-add-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.25rem;
+  text-align: center;
+}
+
+/* Remove the tooltip styles since they're hover-based */
+.tooltip-container {
+  display: none;
+}
+
+.tooltip {
+  display: none;
+}
+
+/* Add tooltip styles */
+/* Remove the tooltip styles */
+
+/* Add styles for the expand indicator and text */
+/* Remove the expand-indicator container styles since we're not using that div anymore */
+/* Update the expand-indicator styles to position it next to the title */
+.expand-indicator {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 6px;
+}
+
+/* Update the expand-text styles to position it next to the title */
+.expand-text {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+/* Update the summary-title to better accommodate the new layout */
+.summary-title {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  position: relative;
+  letter-spacing: 0.5px;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+/* Update the toggle icon to be positioned at the end of the title */
+.summary-toggle-icon {
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+  display: inline-block;
+  margin-left: 6px;
+}
+
+/* Responsive adjustments for the typography-focused design */
+@media (max-width: 768px) {
+  .progress-container,
+  .summary-container {
+    padding: 1rem;
+  }
+
+  .progress-steps {
+    flex-wrap: wrap;
+  }
+
+  .progress-step {
+    width: 50%;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-line {
+    display: none;
+  }
+
+  .step-circle {
+    width: 55px;
+    height: 55px;
+  }
+
+  .step-text {
+    font-size: 1.6rem;
+  }
+
+  .step-circle.completed .step-text {
+    font-size: 1.8rem;
+  }
+
+  .step-label {
+    font-size: 0.9rem;
+  }
+
+  .step-label.active {
+    font-size: 1rem;
+  }
+
+  .step-description {
+    font-size: 0.75rem;
+  }
+
+  /* Summary responsive adjustments */
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .summary-add-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .summary-circle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .summary-value {
+    font-size: 1.2rem;
+  }
+
+  .summary-item {
+    margin-bottom: 0.5rem;
+  }
+
+  .summary-circle {
+    width: 45px; /* Slightly smaller on mobile but still visible */
+    height: 45px;
+  }
+
+  .tooltip {
+    font-size: 0.7rem;
+    padding: 6px 10px;
+  }
+
+  .summary-plus {
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+  }
+
+  .summary-content {
+    max-height: 800px; /* Adjust for the 2-column layout */
+  }
+
+  .collapsed .summary-content {
+    max-height: 0;
+  }
+
+  .expanded .summary-content {
+    max-height: 800px;
+  }
+}
+
+@media (max-width: 480px) {
+  .progress-container,
+  .summary-container {
+    padding: 0.75rem;
+  }
+
+  .progress-step {
+    width: 50%;
+    margin-bottom: 1.25rem;
+  }
+
+  .step-circle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .step-text {
+    font-size: 1.4rem;
+  }
+
+  .step-circle.completed .step-text {
+    font-size: 1.6rem;
+  }
+
+  .step-label {
+    font-size: 0.85rem;
+    letter-spacing: 0.8px;
+  }
+
+  .step-label.active {
+    font-size: 0.9rem;
+  }
+
+  .step-description {
+    font-size: 0.7rem;
+    max-width: 100px;
+  }
+
+  .progress-title,
+  .summary-title {
+    font-size: 1rem;
+  }
+
+  .progress-percentage,
+  .summary-percentage {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .summary-item-title {
+    font-size: 0.8rem;
+  }
+
+  .summary-circle {
+    width: 45px;
+    height: 45px;
+  }
+
+  .summary-value {
+    font-size: 1.1rem;
+  }
+
+  .summary-connector {
+    height: 12px;
+    margin-bottom: 0.5rem;
+  }
+
+  .tooltip {
+    width: 120px;
+    white-space: normal;
+    font-size: 0.65rem;
+    padding: 5px 8px;
+  }
+
+  .summary-add-button {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .summary-toggle-icon {
+    font-size: 0.7rem;
+    margin-left: 8px;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .summary-header {
+    padding: 0.65rem 1rem; /* Even more compact on mobile */
+  }
+
+  .summary-content {
+    padding: 0 1rem 1rem 1rem;
+  }
+
+  .summary-title {
+    font-size: 1rem;
+  }
+
+  .summary-percentage {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .dashboard-tooltip {
+    bottom: -25px;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+  .expand-text {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-header {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .summary-content {
+    padding: 0 0.75rem 0.75rem 0.75rem;
+  }
+
+  .summary-title {
+    font-size: 0.9rem;
+  }
+
+  .summary-title-accent {
+    height: 14px;
+    width: 2px;
+    margin-right: 8px;
+  }
+
+  .summary-percentage {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+    margin-left: 0.5rem;
+  }
+
+  .summary-toggle-icon {
+    font-size: 0.7rem;
+    margin-left: 6px;
+  }
+
+  .dashboard-tooltip {
+    bottom: -22px;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+  }
+  .expand-text {
+    font-size: 0.6rem;
+  }
+}
+

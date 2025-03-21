@@ -1,0 +1,192 @@
+/* Add this to the existing TeamSetup.css file */
+
+.team-action-button.rules-button {
+  background-color: #9c27b0;
+  color: white;
+}
+
+.team-action-button.rules-button:hover {
+  background-color: #7b1fa2;
+}
+
+/* Update the teams list table to be more compact */
+.teams-list {
+  margin-top: 1.5rem;
+  background-color: var(--navy);
+  border-radius: 8px;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.teams-list h3 {
+  color: #ffd700;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.teams-list-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.teams-list-header {
+  display: flex;
+  background-color: var(--navy-light);
+  color: var(--text-light);
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9rem;
+}
+
+.team-row {
+  display: flex;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s;
+  align-items: center;
+  min-height: 40px;
+}
+
+.team-row:last-child {
+  border-bottom: none;
+  border-radius: 0 0 6px 6px;
+}
+
+.team-row:hover {
+  background-color: var(--navy-dark);
+}
+
+.team-row.active {
+  background-color: rgba(41, 161, 156, 0.1);
+  border-left: 3px solid var(--teal);
+}
+
+.team-column {
+  padding: 0.25rem;
+}
+
+.name-column {
+  flex: 2;
+  font-weight: 500;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.level-column {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.actions-column {
+  flex: 2;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex-wrap: nowrap;
+}
+
+.competition-level-badge {
+  background-color: var(--orange);
+  color: white;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.team-action-button {
+  background-color: var(--teal);
+  color: white;
+  border: none;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 40px;
+}
+
+.team-action-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.team-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.team-action-button.edit-button {
+  background-color: var(--teal);
+}
+
+.team-action-button.delete-button {
+  background-color: #f44336;
+}
+
+.team-action-button.active-button {
+  background-color: var(--orange);
+}
+
+.team-action-button.active-button.is-active {
+  background-color: #4caf50;
+  cursor: default;
+}
+
+.team-action-button.rules-button {
+  background-color: #9c27b0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .teams-list-header {
+    display: none;
+  }
+
+  .team-row {
+    flex-direction: column;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+  }
+
+  .team-column {
+    width: 100%;
+    padding: 0.15rem 0;
+  }
+
+  .name-column {
+    font-size: 1rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .level-column {
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+  }
+
+  .actions-column {
+    justify-content: flex-start;
+    margin-top: 0.35rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .actions-column {
+    gap: 0.25rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+
+  .team-action-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+

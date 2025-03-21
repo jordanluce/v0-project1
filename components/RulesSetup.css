@@ -1,0 +1,307 @@
+.rules-setup-modal {
+  max-width: 600px;
+}
+
+.rules-explanation {
+  background-color: var(--navy-light);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+  border-left: 4px solid var(--teal);
+}
+
+.rules-section {
+  margin-bottom: 2rem;
+  background-color: var(--navy);
+  padding: 1.25rem;
+  border-radius: 8px;
+  color: var(--text-light);
+}
+
+.rules-section-title {
+  color: var(--orange);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.1rem;
+}
+
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.rule-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.rule-item.full-width {
+  grid-column: span 2;
+}
+
+.rule-item label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.rule-item input {
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.rule-item input:focus {
+  border-color: var(--teal);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.3);
+}
+
+.rule-help {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+/* Add styles for required fields and validation */
+.required-field::after {
+  content: " *";
+  color: #f44336;
+  font-weight: bold;
+}
+
+.input-error {
+  border-color: #f44336 !important;
+  background-color: rgba(244, 67, 54, 0.05) !important;
+}
+
+.field-error {
+  color: #f44336;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.rules-summary {
+  background-color: var(--navy-light);
+  padding: 1.25rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  color: var(--text-light);
+  border-left: 4px solid var(--orange);
+}
+
+.rules-summary h3 {
+  margin-bottom: 1rem;
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.rules-summary ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.rules-summary li {
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.rules-summary li::before {
+  content: "•";
+  position: absolute;
+  left: 0.5rem;
+  color: var(--orange);
+}
+
+.rules-not-applicable {
+  background-color: var(--navy);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+  text-align: center;
+  border-left: 4px solid var(--orange);
+}
+
+.rules-not-applicable p {
+  margin-bottom: 1rem;
+}
+
+.rules-not-applicable p:last-child {
+  margin-bottom: 0;
+}
+
+.action-button.secondary {
+  background-color: var(--navy-light);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-button.secondary:hover:not(:disabled) {
+  background-color: var(--navy-dark);
+}
+
+/* Add custom dropdown styling */
+.rule-item select {
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-light);
+  font-size: 1rem;
+  appearance: none; /* Remove default arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255, 255, 255, 0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.rule-item select:focus {
+  border-color: var(--teal);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.3);
+}
+
+.rule-item select:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Custom styling for dropdown options */
+.rule-item select option {
+  background-color: var(--navy-dark);
+  color: var(--text-light);
+  padding: 0.75rem;
+}
+
+/* Special styling for the unlimited option */
+.unlimited-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.unlimited-option::before {
+  content: "∞";
+  font-size: 1.2rem;
+  color: var(--teal);
+}
+
+/* Add a custom badge for unlimited values in the UI */
+.unlimited-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(41, 161, 156, 0.2);
+  color: var(--teal);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.unlimited-badge::before {
+  content: "∞";
+  margin-right: 0.25rem;
+  font-size: 1.1rem;
+}
+
+/* Add these styles for the new stepper controls */
+
+.stepper-control {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.stepper-button {
+  width: 46px;
+  height: 46px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-light);
+  font-size: 1.5rem;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.stepper-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.stepper-button:active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.stepper-button.decrement {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stepper-button.increment {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stepper-value {
+  flex: 1;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-light);
+  padding: 0 10px;
+}
+
+/* Add hover effects with theme colors */
+.stepper-button.increment:hover {
+  background-color: rgba(41, 161, 156, 0.3);
+}
+
+.stepper-button.decrement:hover {
+  background-color: rgba(226, 125, 96, 0.3);
+}
+
+@media (max-width: 768px) {
+  .rules-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rule-item.full-width {
+    grid-column: span 1;
+  }
+
+  /* Responsive adjustments */
+  .stepper-control {
+    height: 50px; /* Slightly larger on mobile for better touch targets */
+  }
+
+  .stepper-button {
+    width: 50px;
+    height: 50px;
+    font-size: 1.8rem; /* Larger font for better visibility */
+  }
+}
+
+@media (max-width: 480px) {
+  .stepper-control {
+    width: 100%;
+  }
+}
+
