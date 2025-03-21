@@ -452,38 +452,35 @@ const LineupSelectionModal = ({ onClose }) => {
 
           // Check competition level
           if (isInternational) {
-            // International: Simple 14.0 limit
+            // International: Simple 14.0 limit (no change)
             return totalClassification <= 14.0
           } else if (isEuroCup) {
             // EuroCup: Calculate bonuses
             const bonuses = calculateBonuses(combo)
             const bonusPoints = bonuses.totalBonus
 
-            // Calculate adjusted max with bonuses, capped at 17.0
-            const adjustedMaxClassification = Math.min(14.5 + bonusPoints, 17.0)
+            // NEW VALIDATION LOGIC: Check if (Total Classification - Total Bonus) exceeds 14.5
+            if (totalClassification - bonusPoints > 14.5) {
+              return false
+            }
 
-            // Check if the combination is valid
-            return totalClassification <= adjustedMaxClassification
+            // Also check against the 17.0 cap
+            return totalClassification <= 17.0
           } else if (isNational && activeTeam?.rules) {
             // National: Check against custom rules
             const rules = activeTeam.rules
-            const baseLimit = 14.5
 
             // Calculate bonuses
             const bonuses = calculateBonuses(combo)
             const bonusPoints = bonuses.totalBonus
-            const totalWithBonuses = totalClassification + bonusPoints
 
-            // First check: If base classification exceeds 14.5, ensure we have enough bonus points
-            if (totalClassification > baseLimit) {
-              const neededBonus = totalClassification - baseLimit
-              if (bonusPoints < neededBonus) {
-                return false
-              }
+            // NEW VALIDATION LOGIC: Check if (Total Classification - Total Bonus) exceeds 14.5
+            if (totalClassification - bonusPoints > 14.5) {
+              return false
             }
 
-            // Second check: Total points limit (with bonuses) against max allowed
-            if (totalWithBonuses > rules.maxPointsAllowed) {
+            // Check if total classification exceeds the maximum allowed
+            if (totalClassification > rules.maxPointsAllowed) {
               return false
             }
 
@@ -746,38 +743,35 @@ const LineupSelectionModal = ({ onClose }) => {
 
           // Check competition level
           if (isInternational) {
-            // International: Simple 14.0 limit
+            // International: Simple 14.0 limit (no change)
             return totalClassification <= 14.0
           } else if (isEuroCup) {
             // EuroCup: Calculate bonuses
             const bonuses = calculateBonuses(combo)
             const bonusPoints = bonuses.totalBonus
 
-            // Calculate adjusted max with bonuses, capped at 17.0
-            const adjustedMaxClassification = Math.min(14.5 + bonusPoints, 17.0)
+            // NEW VALIDATION LOGIC: Check if (Total Classification - Total Bonus) exceeds 14.5
+            if (totalClassification - bonusPoints > 14.5) {
+              return false
+            }
 
-            // Check if the combination is valid
-            return totalClassification <= adjustedMaxClassification
+            // Also check against the 17.0 cap
+            return totalClassification <= 17.0
           } else if (isNational && activeTeam?.rules) {
             // National: Check against custom rules
             const rules = activeTeam.rules
-            const baseLimit = 14.5
 
             // Calculate bonuses
             const bonuses = calculateBonuses(combo)
             const bonusPoints = bonuses.totalBonus
-            const totalWithBonuses = totalClassification + bonusPoints
 
-            // First check: If base classification exceeds 14.5, ensure we have enough bonus points
-            if (totalClassification > baseLimit) {
-              const neededBonus = totalClassification - baseLimit
-              if (bonusPoints < neededBonus) {
-                return false
-              }
+            // NEW VALIDATION LOGIC: Check if (Total Classification - Total Bonus) exceeds 14.5
+            if (totalClassification - bonusPoints > 14.5) {
+              return false
             }
 
-            // Second check: Total points limit (with bonuses) against max allowed
-            if (totalWithBonuses > rules.maxPointsAllowed) {
+            // Check if total classification exceeds the maximum allowed
+            if (totalClassification > rules.maxPointsAllowed) {
               return false
             }
 
@@ -1218,12 +1212,23 @@ const LineupSelectionModal = ({ onClose }) => {
                     <div className="suggested-lineup-preview">
                       <div className="suggested-lineup-header">
                         <h4>Suggested Lineup Preview</h4>
-                        <span className="suggested-lineup-classification">
-                          {suggestedLineup.totalClassification.toFixed(1)} pts
-                          {suggestedLineup.bonusPoints > 0 && (
-                            <span className="suggested-lineup-bonus"> (+{suggestedLineup.bonusPoints.toFixed(1)})</span>
+                        <div className="suggested-lineup-stats">
+                          <span className="suggested-lineup-classification">
+                            {suggestedLineup.totalClassification.toFixed(1)} pts
+                            {suggestedLineup.bonusPoints > 0 && (
+                              <span className="suggested-lineup-bonus">
+                                {" "}
+                                (+{suggestedLineup.bonusPoints.toFixed(1)})
+                              </span>
+                            )}
+                          </span>
+                          {(isEuroCup || isNational) && (
+                            <span className="suggested-lineup-after-bonus">
+                              Lineup After Bonus:{" "}
+                              {(suggestedLineup.totalClassification - suggestedLineup.bonusPoints).toFixed(1)}/14.5
+                            </span>
                           )}
-                        </span>
+                        </div>
                       </div>
 
                       <div className="suggested-lineup-players">
@@ -1374,12 +1379,19 @@ const LineupSelectionModal = ({ onClose }) => {
                               >
                                 {/* Update the auto-lineup-card to show bonus requirement information */}
                                 <div className="auto-lineup-header">
-                                  <span className="auto-lineup-classification">
-                                    {lineup.totalClassification.toFixed(1)} pts
-                                    {lineup.bonusPoints > 0 && (
-                                      <span className="auto-lineup-bonus"> (+{lineup.bonusPoints.toFixed(1)})</span>
+                                  <div className="auto-lineup-stats">
+                                    <span className="auto-lineup-classification">
+                                      {lineup.totalClassification.toFixed(1)} pts
+                                      {lineup.bonusPoints > 0 && (
+                                        <span className="auto-lineup-bonus"> (+{lineup.bonusPoints.toFixed(1)})</span>
+                                      )}
+                                    </span>
+                                    {(isEuroCup || isNational) && (
+                                      <span className="auto-lineup-after-bonus">
+                                        After Bonus: {(lineup.totalClassification - lineup.bonusPoints).toFixed(1)}/14.5
+                                      </span>
                                     )}
-                                  </span>
+                                  </div>
                                 </div>
                                 <div className="auto-lineup-players">
                                   {lineup.players.map((player) => (
@@ -1686,4 +1698,5 @@ const LineupSelectionModal = ({ onClose }) => {
 }
 
 export default LineupSelectionModal
+
 
