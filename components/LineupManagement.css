@@ -1,306 +1,195 @@
-.lineup-selection-modal {
-  max-width: 600px;
-  width: 90%;
-  max-height: 90vh;
-  background-color: var(--light-gray);
-}
+/* Add these new styles to the existing LineupManagement.css file */
 
-.lineup-tabs {
-  display: flex;
-  border-bottom: 2px solid var(--navy);
-  margin-bottom: 1.5rem;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.tab-button {
-  padding: 0.75rem 1.5rem;
-  background: none;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
-  position: relative;
-  transition: color 0.3s;
-  flex: 1;
-  text-align: center;
-}
-
-/* Default tab button styling */
-.tab-button {
-  color: var(--navy);
-}
-
-/* Manual Lineup Generator tab - orange theme */
-.tab-button:nth-child(1) {
-  color: var(--orange);
-}
-
-/* Auto Lineup Generator tab - teal theme */
-.tab-button:nth-child(2) {
-  color: var(--teal);
-}
-
-/* Saved Lineups tab - default/navy theme */
-.tab-button:nth-child(3) {
-  color: var(--navy);
-}
-
-/* Active tab styling */
-.tab-button.active {
-  font-weight: 500;
-}
-
-/* Update the active indicator to match tab color */
-.tab-button.active::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-}
-
-/* Set active indicator colors for each tab */
-.tab-button:nth-child(1).active::after {
-  background-color: var(--orange);
-}
-
-.tab-button:nth-child(2).active::after {
-  background-color: var(--teal);
-}
-
-.tab-button:nth-child(3).active::after {
-  background-color: var(--navy);
-}
-
-.tab-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.tab-note {
-  font-size: 0.7rem;
-  opacity: 0.7;
-  margin-left: 0.5rem;
-}
-
-.tab-content {
-  overflow-y: auto;
-  max-height: calc(90vh - 150px);
-  scrollbar-width: thin;
-  scrollbar-color: var(--teal) var(--light-gray);
-  padding-right: 0.5rem;
-}
-
-.tab-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.tab-content::-webkit-scrollbar-track {
-  background: var(--light-gray);
-  border-radius: 8px;
-}
-
-.tab-content::-webkit-scrollbar-thumb {
-  background-color: var(--teal);
-  border-radius: 8px;
-}
-
-.auto-generator-header {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1.5rem;
-}
-
-.auto-generator-header h3 {
-  color: var(--navy);
-  margin-bottom: 0.75rem;
-  font-size: 1.2rem;
-}
-
-.limit-note {
-  font-size: 0.85rem;
-  color: var(--navy-light);
-  font-weight: normal;
-}
-
-/* Player Filter Section */
-.player-filter-section {
-  background-color: var(--navy);
-  padding: 0;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--text-light);
-  overflow: hidden;
-  transition: all 0.3s ease-in-out;
-}
-
-.filter-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background-color 0.2s;
-}
-
-.filter-section-header:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.filter-section-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.filter-section-title h4 {
-  color: var(--text-light);
-  margin: 0;
-  font-size: 1rem;
-}
-
-.filter-count {
-  background-color: var(--teal);
-  color: white;
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.filter-section-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.filter-toggle-icon {
-  color: var(--teal);
-  font-size: 0.8rem;
-  transition: transform 0.3s ease;
-}
-
-.player-filter-section.collapsed .filter-toggle-icon {
-  transform: rotate(0deg);
-}
-
-.player-filter-section.expanded .filter-toggle-icon {
-  transform: rotate(180deg);
-}
-
-.filter-section-content {
-  padding: 0;
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: all 0.3s ease-in-out;
-}
-
-.player-filter-section.expanded .filter-section-content {
-  padding: 1rem;
-  max-height: 400px;
-  opacity: 1;
-}
-
-.player-filter-section.collapsed .filter-section-content {
-  padding: 0 1rem;
-}
-
-.filter-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.filter-header h4 {
-  color: var(--text-light);
-  margin: 0;
-  font-size: 1rem;
-}
-
-.clear-filters-button {
-  background-color: transparent;
-  border: 1px solid var(--error);
-  color: var(--error);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.clear-filters-button:hover {
+.rule-violations {
   background-color: rgba(244, 67, 54, 0.1);
-  transform: translateY(-1px);
+  color: var(--error);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--error);
+  border-left: 4px solid var(--error);
 }
 
-.filter-description {
+.rule-violations h4 {
+  margin-bottom: 0.5rem;
+  color: var(--error);
+  font-weight: 600;
+}
+
+.rule-violations ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.violation-item {
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.violation-item::before {
+  content: "•";
+  position: absolute;
+  left: 0.5rem;
+  color: var(--error);
+}
+
+.violation-item.foreign::before {
+  content: "🌍";
+}
+
+.violation-item.ableBody::before {
+  content: "👤";
+}
+
+.violation-item.points::before {
+  content: "🔢";
+}
+
+.player-selection-card.foreign {
+  border-left: 4px solid #ff9800;
+}
+
+.player-selection-card.able-body {
+  border-left: 4px solid #9c27b0;
+}
+
+.foreign-indicator,
+.able-body-indicator {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.25rem;
+  border-radius: 3px;
+  margin-left: 0.25rem;
+}
+
+.foreign-indicator {
+  background-color: #ff9800;
+  color: white;
+}
+
+.able-body-indicator {
+  background-color: #9c27b0;
+  color: white;
+}
+
+.lineup-player.foreign {
+  border-left: 3px solid #ff9800;
+}
+
+.lineup-player.able-body {
+  border-left: 3px solid #9c27b0;
+}
+
+.player-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.1rem 0.25rem;
+  border-radius: 3px;
+  margin-left: 0.25rem;
+}
+
+.player-status.foreign {
+  background-color: #ff9800;
+  color: white;
+}
+
+.player-status.able-body {
+  background-color: #9c27b0;
+  color: white;
+}
+
+.national-rules-summary {
+  background-color: var(--navy-light);
+  padding: 1.25rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  color: var(--text-light);
+  border-left: 4px solid var(--teal);
+  width: 100%;
+  max-width: 100%;
+}
+
+.national-rules-summary h4 {
+  margin-bottom: 1rem;
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.national-rules-summary ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.national-rules-summary li {
   margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Update filter players grid to match the compact design in LineupManagement */
-.filter-players-grid {
+.national-rules-summary li:last-child {
+  border-bottom: none;
+}
+
+.rule-label {
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.rule-value {
+  color: var(--text-light);
+}
+
+.rule-value.violation {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.rule-bonus {
+  margin-left: 0.5rem;
+  color: #ffc107;
+  font-weight: 500;
+}
+
+/* Add these styles to fix the player selection grid and cards */
+
+.player-selection-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 0.5rem;
-  max-height: 250px;
-  overflow-y: auto;
-  padding: 0.75rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.player-selection-card {
   background-color: var(--navy-light);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.filter-players-grid::-webkit-scrollbar {
-  width: 8px;
-}
-
-.filter-players-grid::-webkit-scrollbar-track {
-  background: var(--navy-light);
-  border-radius: 8px;
-}
-
-.filter-players-grid::-webkit-scrollbar-thumb {
-  background-color: var(--teal);
-  border-radius: 8px;
-}
-
-/* Update filter player card styles to match the new design */
-.filter-player-card {
-  background-color: var(--navy);
-  border-radius: 4px;
-  padding: 0.5rem;
+  padding: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
 }
 
-.filter-player-card:hover {
+.player-selection-card:hover {
   background-color: var(--navy-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.filter-player-card.selected {
+.player-selection-card.selected {
   background-color: rgba(41, 161, 156, 0.2);
   border-color: var(--teal);
-  box-shadow: 0 0 0 1px rgba(41, 161, 156, 0.3);
+  box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.3);
 }
 
-.filter-player-card.selected::before {
+.player-selection-card.selected::before {
   content: "";
   position: absolute;
   left: 0;
@@ -310,70 +199,62 @@
   background-color: var(--teal);
 }
 
-.filter-player-card.has-bonus {
+.player-selection-card.over-limit {
+  border-color: var(--error);
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.3);
+}
+
+.player-selection-card.over-limit::before {
+  background-color: var(--error);
+}
+
+.player-selection-card.has-bonus {
   border-left: 3px solid #ffc107;
 }
 
-/* Add styling for disabled filter player cards */
-.filter-player-card.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  position: relative;
+.player-selection-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.filter-player-card.disabled::after {
-  content: "⚠️";
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 14px;
-}
-
-.filter-player-name {
+.player-selection-name {
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
   color: var(--text-light);
 }
 
-.filter-player-attributes {
+.player-attributes {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
-.filter-player-classification {
+.player-selection-classification {
   background-color: var(--orange);
   color: white;
-  padding: 0.1rem 0.25rem;
-  border-radius: 3px;
-  font-size: 0.7rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
   font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
 }
 
-.filter-player-bonus {
+.player-bonus-badge {
   background-color: #ffd700;
   color: #000;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.1rem 0.25rem;
+  padding: 0.15rem 0.35rem;
   border-radius: 4px;
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  margin-right: 4px;
 }
 
-.filter-player-card .filter-gender,
-.filter-player-card .filter-age {
-  font-size: 0.7rem;
+.gender-indicator,
+.age-indicator {
+  font-size: 0.75rem;
   font-weight: 600;
   width: 20px;
   height: 20px;
@@ -381,1195 +262,190 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 4px;
 }
 
-.filter-player-card .filter-gender.female {
+.gender-indicator.female {
   background-color: #e91e63;
   color: white;
 }
 
-.filter-player-card .filter-age.junior {
+.age-indicator.junior {
   background-color: #ff9800;
   color: white;
 }
 
-/* Add these CSS rules to style the FAB and MAB chips consistently */
-.filter-status.able-body.female-able-body {
-  background-color: #e91e63;
-  color: white;
-}
-
-.filter-status.able-body.male-able-body {
-  background-color: #2196f3;
-  color: white;
-}
-
-.player-status.able-body.female-able-body {
-  background-color: #e91e63;
-  color: white;
-}
-
-.player-status.able-body.male-able-body {
-  background-color: #2196f3;
-  color: white;
-}
-
-/* Add styles for the male-able-body and female-able-body classes */
-.filter-status.able-body.male-able-body {
-  background-color: #3498db;
-  color: white;
-}
-
-.filter-status.able-body.female-able-body {
-  background-color: #e84393;
-  color: white;
-}
-
-.player-status.able-body.male-able-body {
-  background-color: #3498db;
-  color: white;
-}
-
-.player-status.able-body.female-able-body {
-  background-color: #e84393;
-  color: white;
-}
-
-.auto-lineups-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.classification-groups {
-  margin-bottom: 1.5rem;
-}
-
-.classification-group {
-  margin-bottom: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: var(--navy);
-}
-
-/* Improve accordion styling for better visibility and interaction */
-.classification-group-header {
-  background-color: var(--navy-light);
-  padding: 0.5rem 0.75rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  transition: background-color 0.2s;
-  user-select: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-light);
-}
-
-.classification-group-header:hover {
-  background-color: var(--navy-dark);
-}
-
-.group-toggle {
-  margin-right: 0.75rem;
-  font-size: 0.9rem;
-  color: var(--teal);
-  transition: transform 0.2s ease;
-  display: inline-block;
-  width: 16px;
-  text-align: center;
-}
-
-.classification-group-header:hover .group-toggle {
-  transform: scale(1.2);
-}
-
-/* Improve header styling & spacing */
-.group-title {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text-light);
-}
-
-.group-bonus {
-  color: #ffd700;
-  font-weight: bold;
-  margin-left: 4px;
-}
-
-.group-count {
-  color: var(--text-light);
-  font-weight: normal;
-  font-size: 0.9rem;
-  margin-left: 8px;
-}
-
-/* Update the classification group content to use a grid layout */
-.classification-group-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background-color: var(--navy);
-}
-
-/* Fix the auto-lineup-card styling */
-.auto-lineup-card {
-  background-color: var(--navy-light);
-  border-radius: 4px;
-  padding: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  opacity: 0.7;
-  transform: translateY(10px);
-  margin-bottom: 0.5rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-  color: var(--text-light);
-}
-
-.auto-lineup-card.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.auto-lineup-card:hover {
-  background-color: var(--navy-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.auto-lineup-card.selected {
-  border-color: var(--teal);
-  background-color: rgba(41, 161, 156, 0.1);
-  box-shadow: 0 0 0 1px rgba(41, 161, 156, 0.3);
-}
-
-.auto-lineup-card.selected::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background-color: var(--teal);
-}
-
-/* Add styling for the bonus requirement indicator */
-
-/* Adjust auto-lineup-header for better alignment */
-.auto-lineup-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.auto-lineup-classification {
-  background-color: var(--orange);
-  color: white;
-  padding: 0.15rem 0.35rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: none;
-  text-align: center;
-}
-
-/* Make the players list more compact */
-.auto-lineup-players {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.85rem;
-}
-
-/* Improve player entry formatting for better readability */
-.auto-lineup-player {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.35rem 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: var(--navy);
-  border-radius: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.auto-lineup-player .player-name {
-  flex: 1;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: 0.5rem;
-  color: var(--text-light);
-  font-weight: 500;
-  text-align: left;
-}
-
-.auto-lineup-player .player-attributes {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-
-.auto-lineup-player .player-category-chips {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 30px;
-}
-
-.auto-lineup-player .player-classification {
-  background-color: var(--orange);
-  color: white;
-  padding: 0.15rem 0.25rem;
-  border-radius: 3px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: none;
-  text-align: right;
-  min-width: 30px;
-}
-
-.auto-lineup-player:last-child {
-  border-bottom: none;
-}
-
-/* Add styles for the category chips in the Auto Lineup Generator */
-.auto-lineup-player .player-gender,
-.auto-lineup-player .player-age,
-.saved-lineup-player .player-gender,
-.saved-lineup-player .player-age {
+.foreign-indicator,
+.able-body-indicator {
   font-size: 0.7rem;
   font-weight: 600;
   padding: 0.1rem 0.25rem;
   border-radius: 3px;
   margin-left: 0.25rem;
-  display: inline-block;
 }
 
-.auto-lineup-player .player-gender.female,
-.saved-lineup-player .player-gender.female {
-  background-color: #e91e63;
-  color: white;
-}
-
-.auto-lineup-player .player-age.junior,
-.saved-lineup-player .player-age.junior {
+.foreign-indicator {
   background-color: #ff9800;
   color: white;
 }
 
-/* Improve Save button visibility */
-.save-lineup-button {
-  background-color: var(--teal);
+.able-body-indicator {
+  background-color: #9c27b0;
   color: white;
-  border: none;
-  padding: 0.5rem 0.75rem;
+}
+
+/* Add these CSS rules to style the FAB and MAB chips consistently */
+.player-selection-card.female-able-body .able-body-indicator.female-able-body {
+  background-color: #e91e63;
+  color: white;
+}
+
+.player-selection-card.male-able-body .able-body-indicator.male-able-body {
+  background-color: #2196f3;
+  color: white;
+}
+
+/* Ensure FAB players show their bonus properly */
+.player-selection-card.female-able-body.has-bonus .player-bonus-badge {
+  background-color: #e91e63;
+  color: white;
+  padding: 2px 5px;
   border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  text-align: center;
+  font-size: 0.8em;
+  margin-left: 5px;
 }
 
-.save-lineup-button:hover {
-  background-color: var(--teal-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.auto-lineup-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.5rem;
-  width: 100%;
-}
-
-/* Changed Save button to teal to stand out from orange */
-
-/* Enhanced hover effect for Save button */
-
-/* Add a subtle pulsing animation to draw attention to the save button */
-@keyframes subtle-pulse {
-  0% {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  50% {
-    box-shadow: 0 2px 8px rgba(41, 161, 156, 0.4);
-  }
-  100% {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-}
-
-/* Apply the animation to newly rendered buttons */
-.auto-lineup-card:hover .save-lineup-button {
-  animation: subtle-pulse 2s infinite;
-}
-
-/* Update player name and classification styles for compactness */
-.player-name {
-  flex: 1;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: 0.5rem;
-  color: var(--text-light);
-  font-weight: 500;
-}
-
-.player-classification {
-  background-color: var(--orange);
-  color: white;
-  padding: 0.15rem 0.25rem;
-  border-radius: 3px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  border: none;
-}
-
-.player-number {
-  background-color: var(--teal);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-/* Ensure consistent spacing in player attributes */
-.player-attributes,
-.player-details {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.no-lineups-message {
-  text-align: center;
-  padding: 2.5rem;
-  color: var(--navy);
-  background-color: var(--light-gray);
+/* Classification summary styling */
+.classification-summary {
+  background-color: var(--navy);
+  padding: 1rem;
   border-radius: 8px;
-  font-size: 1rem;
   margin: 1.5rem 0;
-  border: 1px solid var(--border-dark);
-}
-
-/* Add styles for the naming popup */
-.naming-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(30, 31, 38, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1100;
-}
-
-.naming-popup-content {
-  background-color: var(--light-gray);
-  padding: 1.75rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  animation: popup-appear 0.3s ease-out;
-  scrollbar-width: thin;
-  scrollbar-color: var(--teal) var(--light-gray);
-  border: 1px solid var(--border-dark);
-}
-
-@keyframes popup-appear {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.naming-popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.naming-popup-header h3 {
-  color: var(--navy);
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.lineup-preview {
-  background-color: var(--navy);
-  border-radius: 8px;
-  padding: 1.25rem;
-  margin-bottom: 1.75rem;
-  border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--text-light);
-}
-
-.lineup-preview-header {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-.lineup-preview-classification {
-  background-color: var(--orange);
-  color: white;
-  padding: 0.35rem 0.65rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  border: none;
-}
-
-.lineup-preview-players {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.lineup-preview-player {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background-color: var(--navy-light);
-  border-radius: 6px;
-  transition: transform 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.lineup-preview-player:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.naming-popup-actions {
-  display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
 }
 
-.cancel-button {
-  background-color: transparent;
-  border: 1px solid var(--border-dark);
-  color: var(--navy);
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: all 0.2s;
-}
-
-.cancel-button:hover {
-  background-color: rgba(41, 161, 156, 0.1);
-  transform: translateY(-2px);
-}
-
-.save-button {
-  background-color: var(--orange);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.save-button:hover {
-  background-color: var(--orange-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.error-message {
+.classification-summary.over-limit {
+  border-color: var(--error);
   background-color: rgba(244, 67, 54, 0.1);
-  color: var(--error);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--error);
-  border-left: 4px solid var(--error);
-  font-size: 0.95rem;
 }
 
-.generating-message {
-  background-color: rgba(41, 161, 156, 0.1);
-  color: var(--teal);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--teal);
-  border-left: 4px solid var(--teal);
-  font-size: 0.95rem;
+.classification-total,
+.classification-limit {
+  color: var(--text-light);
+  font-weight: 500;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.generating-message::before {
-  content: "";
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid var(--teal);
-  border-top-color: transparent;
-  margin-right: 12px;
-  animation: spin 1s linear infinite;
+.classification-value,
+.base-limit-value {
+  font-weight: 700;
+  color: var(--orange);
+  margin-left: 0.25rem;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Add styles for the Saved Lineups tab */
-.saved-lineups-tab {
+.bonus-indicator {
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.saved-lineups-header {
-  margin-bottom: 0.5rem;
-}
-
-.saved-lineups-header h3 {
-  color: var(--navy);
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-}
-
-.saved-lineups-description {
-  font-size: 0.9rem;
-  color: var(--navy-light);
-  margin-bottom: 1rem;
-}
-
-.saved-lineups-section {
-  background-color: var(--navy);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: var(--text-light);
-}
-
-.saved-section-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.saved-section-header h4 {
-  color: var(--text-light);
-  margin: 0;
-  font-size: 1rem;
-}
-
-.lineup-count {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
-  background-color: rgba(41, 161, 156, 0.1);
+  background-color: rgba(255, 193, 7, 0.2);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.saved-lineups-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.75rem;
+.bonus-indicator:hover {
+  background-color: rgba(255, 193, 7, 0.3);
 }
 
-/* Improved structured layout for saved lineup players */
-.saved-lineup-players {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.35rem;
-  margin-bottom: 0.75rem;
-  background-color: var(--navy-light);
-  border-radius: 4px;
-  padding: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Make the player display more structured and aligned */
-.saved-lineup-player {
-  display: flex;
-  align-items: center;
-  background-color: var(--navy);
+.bonus-value {
+  background-color: #ffd700;
+  color: #000;
+  padding: 0.1rem 0.3rem;
   border-radius: 3px;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-left: 2px solid var(--orange);
-}
-
-/* Adjust the saved-lineup-card to accommodate the new player layout */
-.saved-lineup-card {
-  background-color: var(--navy-light);
-  border-radius: 4px;
-  padding: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.saved-lineup-card:hover {
-  background-color: var(--navy-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-}
-
-.saved-lineup-card.selected {
-  border-color: var(--teal);
-  background-color: rgba(41, 161, 156, 0.1);
-  box-shadow: 0 0 0 1px rgba(41, 161, 156, 0.3);
-}
-
-/* Update the header to match auto-lineup-header */
-.saved-lineup-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.saved-lineup-name {
-  display: none; /* Hide the name as it's not in the auto-lineup design */
-}
-
-.saved-lineup-classification-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.saved-lineup-classification {
-  background-color: var(--orange);
-  color: white;
-  padding: 0.15rem 0.35rem;
-  border-radius: 4px;
   font-size: 0.85rem;
-  font-weight: 600;
-  border: none;
-  text-align: center;
+  font-weight: bold;
 }
 
-.saved-lineup-bonus {
+.adjusted-limit {
+  color: white;
+  background-color: var(--teal);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-left: 0.25rem;
+}
+
+.classification-bonus {
   color: #ffd700;
   font-weight: bold;
   margin-left: 4px;
 }
 
-/* Update the players list to match auto-lineup-players */
-.saved-lineup-players {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.85rem;
-  background-color: transparent;
-  border: none;
-  padding: 0;
-}
-
-.saved-lineup-player {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.35rem 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: var(--navy);
-  border-radius: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.saved-lineup-player .player-name {
-  flex: 1;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: 0.5rem;
-  color: var(--text-light);
-  font-weight: 500;
-  text-align: left;
-}
-
-.saved-lineup-player .player-attributes {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-
-.saved-lineup-player .player-category-chips {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 30px;
-}
-
-.saved-lineup-player .player-classification {
-  background-color: var(--orange);
-  color: white;
-  padding: 0.15rem 0.25rem;
-  border-radius: 3px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: none;
-  text-align: right;
-  min-width: 30px;
-}
-
-/* Update the actions to match auto-lineup-actions */
-.saved-lineup-actions {
+/* Modal styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
-  margin-top: auto;
-  width: 100%;
-  padding-top: 0.5rem;
-  border-top: none;
+  align-items: center;
+  z-index: 1000;
 }
 
-/* Create a save button that matches the auto-lineup save button */
-.use-lineup-button {
-  background-color: var(--teal);
-  color: white;
-  border: none;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  text-align: center;
-}
-
-.use-lineup-button:hover {
-  background-color: var(--teal-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Hide the old action buttons */
-.action-button.small {
-  display: none;
-}
-
-/* Increase width of player container */
-
-/* Make player cards more spacious */
-
-/* Ensure action buttons are at the bottom and aligned consistently */
-
-.empty-lineups-message {
-  text-align: center;
-  padding: 1.5rem;
-  color: rgba(255, 255, 255, 0.7);
-  background-color: var(--navy-light);
-  border-radius: 6px;
-  font-size: 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Add styles for the delete button */
-.action-button.small.delete-button {
-  background-color: var(--error);
-}
-
-.action-button.small.delete-button:hover {
-  background-color: #d32f2f;
-}
-
-@media (min-width: 1200px) {
-  .classification-group-content {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-  .filter-players-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  }
-}
-
-@media (max-width: 768px) {
-  .lineup-selection-modal {
-    width: 95%;
-  }
-
-  .classification-group-content {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.35rem;
-    padding: 0.5rem;
-  }
-
-  .auto-lineup-card {
-    padding: 0.35rem;
-  }
-
-  .auto-lineup-player {
-    padding: 0.15rem 0.35rem;
-  }
-
-  .player-name {
-    font-size: 0.8rem;
-  }
-
-  .player-classification {
-    font-size: 0.65rem;
-    padding: 0.1rem 0.2rem;
-  }
-
-  .filter-players-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-
-  .tab-button {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.9rem;
-  }
-
-  .generating-message::before {
-    width: 12px;
-    height: 12px;
-  }
-  .filter-player-name {
-    max-width: 60px;
-  }
-
-  /* Responsive adjustments for saved lineups */
-  .saved-lineups-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 0.5rem;
-  }
-
-  /* Responsive adjustments for saved lineups */
-  .saved-lineups-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 0.5rem;
-  }
-
-  /* Adjust to single column for players on smaller screens */
-  .saved-lineup-players {
-    grid-template-columns: 1fr;
-  }
-
-  /* Ensure lineup cards have consistent minimum height */
-  .saved-lineup-card {
-    min-height: 230px;
-  }
-}
-
-@media (max-width: 480px) {
-  /* For very small screens, adjust further */
-  .saved-lineup-card {
-    min-height: 260px;
-  }
-}
-
-@media (max-width: 768px) {
-  /* Adjust to single column for players on smaller screens */
-  .saved-lineup-players {
-    grid-template-columns: 1fr;
-  }
-
-  /* Ensure lineup cards have consistent minimum height */
-  .saved-lineup-card {
-    min-height: 230px;
-  }
-}
-
-@media (max-width: 480px) {
-  /* For very small screens, adjust further */
-  .saved-lineup-card {
-    min-height: 260px;
-  }
-}
-
-@media (max-width: 768px) {
-  .filter-players-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  }
-}
-
-@media (min-width: 1200px) {
-  .filter-players-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  }
-}
-
-/* Remove debug info styles that are no longer needed */
-.debug-info {
-  display: none;
-}
-
-/* Remove bonus requirement styles that are no longer needed */
-.bonus-requirement {
-  display: none;
-}
-
-/* Smart Suggestions Feature Styles */
-.smart-suggestions-section {
-  margin-bottom: 1.5rem;
-  animation: fadeIn 0.3s ease-out;
+.modal-content {
   background-color: var(--light-gray);
-  border-radius: 8px;
-  padding: 1.25rem;
-  border: 1px solid var(--border-dark);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.smart-suggestions-header {
-  margin-bottom: 1rem;
-}
-
-.smart-suggestions-header h4 {
-  color: var(--navy);
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-  display: flex;
-  align-items: center;
-}
-
-.smart-suggestions-header h4::before {
-  content: "✨";
-  margin-right: 0.5rem;
-  font-size: 1.2rem;
-}
-
-/* Improve alignment of Smart Suggestions controls */
-.smart-suggestions-controls {
-  display: flex;
-  align-items: stretch;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.suggest-lineup-button {
-  background-color: var(--orange);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  white-space: nowrap;
-  flex: 1;
-}
-
-.suggest-lineup-button:hover:not(:disabled) {
-  background-color: var(--orange-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.suggest-lineup-button:disabled {
-  background-color: var(--gray-dark);
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* Improved dropdown styling */
-.strategy-preference-dropdown {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--border-dark);
-  background-color: white;
-  color: var(--navy);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231e1f26' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1rem;
-  transition: all 0.2s ease;
-}
-
-.strategy-preference-dropdown:focus {
-  outline: none;
-  border-color: var(--teal);
-  box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.3);
-}
-
-.strategy-preference-dropdown:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  background-color: #f5f5f5;
-}
-
-.suggestion-error {
-  background-color: rgba(244, 67, 54, 0.1);
-  color: var(--error);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--error);
-  border-left: 4px solid var(--error);
-  font-size: 0.95rem;
-  animation: fadeIn 0.3s ease-out;
-}
-
-.suggested-lineup-preview {
-  background-color: var(--navy);
-  border-radius: 8px;
-  padding: 1.25rem;
-  margin-top: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 0.3s ease-out;
-}
-
-.suggested-lineup-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.suggested-lineup-header h4 {
-  color: var(--text-light);
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.suggested-lineup-classification {
-  background-color: var(--orange);
-  color: white;
-  padding: 0.35rem 0.65rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.suggested-lineup-bonus {
-  color: #ffd700;
-  font-weight: bold;
-}
-
-.suggested-lineup-players {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.suggested-lineup-player {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background-color: var(--navy-light);
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: transform 0.2s ease;
-}
-
-.suggested-lineup-player:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.suggested-lineup-actions {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.save-suggested-lineup-button {
-  background-color: var(--teal);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  text-align: center;
-}
-
-.save-suggested-lineup-button:hover {
-  background-color: var(--teal-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Update the naming popup styles to handle both auto and suggested lineups */
-.naming-popup-content {
-  background-color: var(--light-gray);
-  padding: 1.75rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
+  width: calc(90% + 20px); /* Increase width by 20px */
+  max-width: 620px; /* Increase max-width by 20px (from 600px) */
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  animation: popup-appear 0.3s ease-out;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: fadeIn 0.3s;
   scrollbar-width: thin;
-  scrollbar-color: var(--teal) var(--light-gray);
-  border: 1px solid var(--border-dark);
+  scrollbar-color: var(--primary) var(--light-gray);
 }
 
-/* Add styles for the form group */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--navy);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--navy);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.lineup-management-content {
+  padding: 1.5rem;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -1577,51 +453,218 @@
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--navy);
   font-weight: 500;
-  font-size: 0.95rem;
+  color: var(--navy);
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  border: 1px solid var(--border-dark);
-  background-color: white;
-  color: var(--navy);
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
+  padding: 0.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
-.form-group input:focus {
-  outline: none;
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.action-button {
+  background-color: var(--orange);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: var(--orange-dark);
+}
+
+.action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: var(--error);
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--error);
+}
+
+/* Lineup list styling */
+.lineups-list {
+  margin-top: 2rem;
+}
+
+.lineups-list h3 {
+  margin-bottom: 1rem;
+  color: var(--navy);
+}
+
+.lineups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.lineup-card {
+  background-color: var(--navy);
+  border-radius: 8px;
+  padding: 1rem;
+  color: var(--text-light);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lineup-card.active {
   border-color: var(--teal);
   box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.3);
 }
 
-.form-group input::placeholder {
-  color: var(--gray-dark);
-  opacity: 0.7;
+.lineup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lineup-header h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.lineup-classification-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.classification-badge {
+  background-color: var(--orange);
+  color: white;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.lineup-bonus-badge {
+  background-color: #ffd700;
+  color: #000;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.lineup-player {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lineup-player:last-child {
+  border-bottom: none;
+}
+
+.player-name {
+  font-size: 0.9rem;
+}
+
+.player-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.player-classification {
+  background-color: var(--orange);
+  color: white;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.player-gender,
+.player-age {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.player-gender.female {
+  background-color: #e91e63;
+  color: white;
+}
+
+.player-age.junior {
+  background-color: #ff9800;
+  color: white;
+}
+
+.lineup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-button.small {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 4px;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .suggested-lineup-actions {
-    flex-direction: column;
-    gap: 0.75rem;
+  .player-selection-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .confirm-lineup-button,
-  .edit-manually-button {
-    max-width: none;
+  .modal-content {
+    width: 95%;
+    max-width: 450px;
   }
 }
 
-/* Replace with this simplified responsive adjustment */
-@media (max-width: 768px) {
-  .save-suggested-lineup-button {
-    padding: 0.65rem 1rem;
-    font-size: 0.9rem;
+@media (max-width: 480px) {
+  .player-selection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .classification-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .action-button {
+    width: 100%;
   }
 }
 
