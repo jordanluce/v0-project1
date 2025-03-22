@@ -331,18 +331,16 @@ const LineupManagement = ({ onClose, isEmbedded = false }) => {
       return player ? sum + Number.parseFloat(player.classification) : sum
     }, 0)
 
-    // Get base max classification
-    const baseMax = isInternational ? 14.0 : 14.5
-
     // Calculate bonuses inside the effect
     let bonusTotal = 0
     let violations = []
 
+    // Get selected player objects
+    const selectedPlayerObjects = selectedPlayers.map((id) => players.find((p) => p.id === id)).filter(Boolean)
+
     // For National teams
     if (isNational && activeTeam?.rules) {
       // Calculate bonuses for National teams
-      const selectedPlayerObjects = selectedPlayers.map((id) => players.find((p) => p.id === id)).filter(Boolean)
-
       const rules = activeTeam.rules
       let femaleCount = 0,
         juniorMaleCount = 0,
@@ -368,24 +366,22 @@ const LineupManagement = ({ onClose, isEmbedded = false }) => {
         juniorFemaleBonusCount * rules.juniorFemaleBonus +
         femaleAbleBodyCount * (rules.femaleAbleBodyBonus || 0)
 
-      // Check if base classification exceeds 14.5 without sufficient bonus points
-      if (currentTotal > baseMax) {
-        const neededBonus = currentTotal - baseMax
-        if (bonusTotal < neededBonus) {
-          setIsOverLimit(true)
-          setErrorMessage(
-            `Base classification (${currentTotal.toFixed(1)}) exceeds the limit of ${baseMax.toFixed(1)} without sufficient bonus points. Need ${neededBonus.toFixed(1)} bonus points but only have ${bonusTotal.toFixed(1)}.`,
-          )
-          return
-        }
+      // NEW VALIDATION LOGIC FOR NATIONAL
+      // Check if (Total Classification - Total Bonus) exceeds 14.5
+      if (currentTotal - bonusTotal > 14.5) {
+        setIsOverLimit(true)
+        setErrorMessage(
+          `Base classification minus bonuses (${(currentTotal - bonusTotal).toFixed(1)}) exceeds the limit of 14.5. Add more bonus players or reduce classification.`,
+        )
+        return
       }
 
       // Check if total with bonuses exceeds the maximum allowed in rules
-      const totalWithBonus = currentTotal + bonusTotal
+      const totalWithBonus = currentTotal
       if (totalWithBonus > activeTeam.rules.maxPointsAllowed) {
         setIsOverLimit(true)
         setErrorMessage(
-          `Total classification with bonuses (${totalWithBonus.toFixed(1)}) exceeds the maximum allowed (${activeTeam.rules.maxPointsAllowed.toFixed(1)}) for National competition level`,
+          `Total classification (${totalWithBonus.toFixed(1)}) exceeds the maximum allowed (${activeTeam.rules.maxPointsAllowed.toFixed(1)}) for National competition level`,
         )
         return
       }
@@ -420,8 +416,6 @@ const LineupManagement = ({ onClose, isEmbedded = false }) => {
     // For EuroCup
     else if (isEuroCup) {
       // Calculate bonuses for EuroCup
-      const selectedPlayerObjects = selectedPlayers.map((id) => players.find((p) => p.id === id)).filter(Boolean)
-
       selectedPlayerObjects.forEach((player) => {
         const category = player.category || "Senior"
         if (category === "Female") bonusTotal += 1.5
@@ -429,12 +423,22 @@ const LineupManagement = ({ onClose, isEmbedded = false }) => {
         else if (category === "Junior Female") bonusTotal += 2.0
       })
 
+      // NEW VALIDATION LOGIC FOR EUROCUP
+      // Check if (Total Classification - Total Bonus) exceeds 14.5
+      if (currentTotal - bonusTotal > 14.5) {
+        setIsOverLimit(true)
+        setErrorMessage(
+          `Base classification minus bonuses (${(currentTotal - bonusTotal).toFixed(1)}) exceeds the limit of 14.5. Add more bonus players or reduce classification.`,
+        )
+        return
+      }
+
       // Check against the 17.0 cap
-      const totalWithBonus = currentTotal + bonusTotal
+      const totalWithBonus = currentTotal
       if (totalWithBonus > 17.0) {
         setIsOverLimit(true)
         setErrorMessage(
-          `Total classification with bonuses (${totalWithBonus.toFixed(1)}) exceeds the maximum allowed (17.0) for EuroCup competition level`,
+          `Total classification (${totalWithBonus.toFixed(1)}) exceeds the maximum allowed (17.0) for EuroCup competition level`,
         )
         return
       }
@@ -478,34 +482,45 @@ const LineupManagement = ({ onClose, isEmbedded = false }) => {
 
     // For National teams, check if total classification exceeds the base limit without sufficient bonus points
     if (isNational) {
-      // First check: If base classification exceeds 14.5, ensure we have enough bonus points to cover the excess
-      if (currentTotalClassification > baseMaxClassification) {
-        const neededBonus = currentTotalClassification - baseMaxClassification
-        if (bonuses.totalBonus < neededBonus) {
-          setErrorMessage(
-            `Total classification (${currentTotalClassification.toFixed(1)}) exceeds the base limit of ${baseMaxClassification.toFixed(1)} without sufficient bonus points. You need at least ${neededBonus.toFixed(1)} bonus points but only have ${bonuses.totalBonus.toFixed(1)}.`,
-          )
-          return
-        }
+      // Calculate bonuses
+      const bonusPoints = bonuses.totalBonus
+
+      // NEW VALIDATION LOGIC: Check if (Total Classification - Total Bonus) exceeds 14.5
+      if (currentTotalClassification - bonusPoints > 14.5) {
+        setErrorMessage(
+          `Base classification minus bonuses (${(currentTotalClassification - bonusPoints).toFixed(1)}) exceeds the limit of 14.5. Add more bonus players or reduce classification.`,
+        )
+        return
       }
 
-      // Second check: Ensure total with bonuses doesn't exceed the maximum allowed in rules
-      if (totalWithBonuses > activeTeam.rules.maxPointsAllowed) {
+      // Also check if total classification exceeds the maximum allowed
+      if (currentTotalClassification > activeTeam.rules.maxPointsAllowed) {
         setErrorMessage(
-          `Total classification with bonuses (${totalWithBonuses.toFixed(1)}) exceeds the maximum allowed (${activeTeam.rules.maxPointsAllowed.toFixed(1)}) for ${activeTeam.competitionLevel} competition level`,
+          `Total classification (${currentTotalClassification.toFixed(1)}) exceeds the maximum allowed (${activeTeam.rules.maxPointsAllowed.toFixed(1)}) for ${activeTeam.competitionLevel} competition level`,
         )
         return
       }
     } else if (isEuroCup) {
-      // For EuroCup, check against the 17.0 cap
-      if (totalWithBonuses > 17.0) {
+      // For EuroCup, apply the new validation logic
+      const bonusPoints = bonuses.totalBonus
+
+      // NEW VALIDATION LOGIC: Check if (Total Classification - Total Bonus) exceeds 14.5
+      if (currentTotalClassification - bonusPoints > 14.5) {
         setErrorMessage(
-          `Total classification with bonuses (${totalWithBonuses.toFixed(1)}) exceeds the maximum allowed (17.0) for EuroCup competition level`,
+          `Base classification minus bonuses (${(currentTotalClassification - bonusPoints).toFixed(1)}) exceeds the limit of 14.5. Add more bonus players or reduce classification.`,
+        )
+        return
+      }
+
+      // Also check against the 17.0 cap
+      if (currentTotalClassification > 17.0) {
+        setErrorMessage(
+          `Total classification (${currentTotalClassification.toFixed(1)}) exceeds the maximum allowed (17.0) for EuroCup competition level`,
         )
         return
       }
     } else if (isInternational) {
-      // For International, check against the 14.0 cap
+      // For International, keep the existing validation
       if (currentTotalClassification > 14.0) {
         setErrorMessage(
           `Total classification (${currentTotalClassification.toFixed(1)}) exceeds the maximum allowed (14.0) for International competition level`,
@@ -640,28 +655,33 @@ const LineupManagement = ({ onClose, isEmbedded = false }) => {
     let limitMessage = ""
 
     if (isNational) {
-      // Check if base classification exceeds 14.5 without sufficient bonus points
-      if (newTotal > baseMaxClassification) {
-        const neededBonus = newTotal - baseMaxClassification
-        if (newBonusTotal < neededBonus) {
-          willExceedLimit = true
-          limitMessage = `Adding this player would exceed the base limit of ${baseMaxClassification.toFixed(1)} without sufficient bonus points. Need ${neededBonus.toFixed(1)} bonus points but only have ${newBonusTotal.toFixed(1)}.`
-        }
+      // NEW VALIDATION LOGIC FOR NATIONAL
+      // Check if (Total Classification - Total Bonus) exceeds 14.5
+      if (newTotal - newBonusTotal > 14.5) {
+        willExceedLimit = true
+        limitMessage = `Adding this player would make base classification minus bonuses (${(newTotal - newBonusTotal).toFixed(1)}) exceed the limit of 14.5.`
       }
 
-      // Check if total with bonuses exceeds the maximum allowed in rules
-      if (newTotalWithBonus > activeTeam.rules.maxPointsAllowed) {
+      // Also check if total classification exceeds the maximum allowed in rules
+      if (newTotal > activeTeam.rules.maxPointsAllowed) {
         willExceedLimit = true
         limitMessage = `Adding this player would exceed the maximum allowed limit of ${activeTeam.rules.maxPointsAllowed.toFixed(1)}.`
       }
     } else if (isEuroCup) {
-      // Check against the 17.0 cap
-      if (newTotalWithBonus > 17.0) {
+      // NEW VALIDATION LOGIC FOR EUROCUP
+      // Check if (Total Classification - Total Bonus) exceeds 14.5
+      if (newTotal - newBonusTotal > 14.5) {
+        willExceedLimit = true
+        limitMessage = `Adding this player would make base classification minus bonuses (${(newTotal - newBonusTotal).toFixed(1)}) exceed the limit of 14.5.`
+      }
+
+      // Also check against the 17.0 cap
+      if (newTotal > 17.0) {
         willExceedLimit = true
         limitMessage = `Adding this player would exceed the maximum allowed limit of 17.0 for EuroCup.`
       }
     } else if (isInternational) {
-      // Check against the 14.0 cap
+      // Keep existing validation for International
       if (newTotal > 14.0) {
         willExceedLimit = true
         limitMessage = `Adding this player would exceed the maximum allowed limit of 14.0 for International.`
@@ -948,8 +968,18 @@ const LineupManagement = ({ onClose, isEmbedded = false }) => {
               </li>
               <li>
                 <span className="rule-label">Total Points:</span>
-                <span className={`rule-value ${ruleViolations.some((v) => v.type === "points") ? "violation" : ""}`}>
-                  {totalWithBonuses.toFixed(1)}/{activeTeam.rules.maxPointsAllowed.toFixed(1)} allowed
+                <span
+                  className={`rule-value ${currentTotalClassification > activeTeam.rules.maxPointsAllowed ? "violation" : ""}`}
+                >
+                  {currentTotalClassification.toFixed(1)}/{activeTeam.rules.maxPointsAllowed.toFixed(1)} allowed
+                </span>
+              </li>
+              <li>
+                <span className="rule-label">Lineup After Bonus:</span>
+                <span
+                  className={`rule-value ${(currentTotalClassification - bonuses.totalBonus) > 14.5 ? "violation" : ""}`}
+                >
+                  {(currentTotalClassification - bonuses.totalBonus).toFixed(1)}/14.5 allowed
                 </span>
               </li>
             </ul>
@@ -1096,4 +1126,5 @@ const LineupManagement = ({ onClose, isEmbedded = false }) => {
 }
 
 export default LineupManagement
+
 
