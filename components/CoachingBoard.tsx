@@ -35,7 +35,7 @@ const CoachingBoard = ({
   const [showSavedSystemsDropdown, setShowSavedSystemsDropdown] = useState(false)
   const [staticSystemName, setStaticSystemName] = useState("")
   const [showStaticNamePrompt, setShowStaticNamePrompt] = useState(false)
-  const [playbackSpeed, setPlaybackSpeed] = useState(1) // 0.5 = slow, 1 = normal, 2 = fast
+  const [playbackSpeed, setPlaybackSpeed] = useState(0.75) // 0.5 = slow, 0.75 = normal, 2 = fast
   const [notification, setNotification] = useState({ show: false, message: "" })
 
   // Add state for tactics dropdown
@@ -72,6 +72,10 @@ const CoachingBoard = ({
   const [lastActionTimestamp, setLastActionTimestamp] = useState(null)
   const [previousFrameState, setPreviousFrameState] = useState(null)
   const [significantChangeThreshold] = useState(2) // Minimum pixel change to consider recording a new frame
+
+  // Add a new useRef to track the last selected lineup ID
+  // Add this after the other useRef declarations (around line 70-80)
+  const lastSelectedLineupIdRef = useRef("")
 
   // Add a function to track actions for the undo feature
   const trackAction = (actionType, data) => {
@@ -191,7 +195,220 @@ const CoachingBoard = ({
     }
   }
 
-  // Add this function to handle player selection and swapping
+  // Add competition level detection variables
+  const isInternational = activeTeam?.competitionLevel === "International"
+  const isNational = activeTeam?.competitionLevel === "National"
+  const isEuroCup = activeTeam?.competitionLevel === "Eurocup"
+
+  // Update the wouldExceedLimit function to implement the new validation logic
+  const wouldExceedLimit = (benchPlayer) => {
+    if (!selectedCourtPlayer) return false
+
+    // Get the current total without the selected court player
+    const remainingPlayers = playersOnCourt.filter((p) => p.id !== selectedCourtPlayer.id)
+
+    // Add the bench player to create the simulated lineup
+    const simulatedLineup = [...remainingPlayers, benchPlayer]
+
+    // Calculate the total classification of the simulated lineup
+    const totalClassification = simulatedLineup.reduce(
+      (sum, player) => sum + Number.parseFloat(player.classification),
+      0,
+    )
+
+    // For International competition, just check against 14.0
+    if (isInternational) {
+      return totalClassification > 14.0
+    }
+
+    // For Eurocup and National, apply the new validation logic
+    if (isEuroCup || isNational) {
+      // Calculate bonuses for the simulated lineup
+      const bonuses = calculateBonuses(simulatedLineup)
+      const bonusPoints = bonuses.totalBonus
+
+      // NEW VALIDATION LOGIC: Check if (Total Classification - Total Bonus) exceeds 14.5
+      if (totalClassification - bonusPoints > 14.5) {
+        return true
+      }
+
+      // For Eurocup, also check against the 17.0 cap
+      if (isEuroCup && totalClassification > 17.0) {
+        return true
+      }
+
+      // For National, check against the team's custom rules
+      if (isNational && activeTeam?.rules) {
+        // Check if total classification exceeds the maximum allowed
+        if (totalClassification > activeTeam.rules.maxPointsAllowed) {
+          return true
+        }
+
+        // Check foreign players limit
+        const foreignPlayers = simulatedLineup.filter((p) => p.isForeign)
+        if (activeTeam.rules.maxForeignPlayers !== -1 && foreignPlayers.length > activeTeam.rules.maxForeignPlayers) {
+          return true
+        }
+
+        // Check able-bodied players limit
+        const ableBodyPlayers = simulatedLineup.filter((p) => p.isAbleBody)
+        if (ableBodyPlayers.length > activeTeam.rules.maxAbleBodyPlayers) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
+  // Add a function to calculate bonuses based on player categories and competition level
+  const calculateBonuses = (selectedPlayers) => {
+    // Ensure selectedPlayers is an array
+    if (!Array.isArray(selectedPlayers) || selectedPlayers.length === 0) {
+      return {
+        totalBonus: 0,
+        details: [],
+      }
+    }
+
+    // For International teams, no bonuses
+    if (isInternational) {
+      return {
+        totalBonus: 0,
+        details: [],
+      }
+    }
+
+    // For EuroCup, use standard EuroCup rules
+    if (isEuroCup) {
+      let totalBonus = 0
+      let femaleCount = 0
+      let juniorMaleCount = 0
+      let juniorFemaleCount = 0
+
+      selectedPlayers.forEach((player) => {
+        if (!player) return // Skip null/undefined players
+
+        const category = player.category || "Senior"
+
+        if (category === "Female") {
+          femaleCount++
+          totalBonus += 1.5
+        } else if (category === "Junior") {
+          juniorMaleCount++
+          totalBonus += 1.0
+        } else if (category === "Junior Female") {
+          juniorFemaleCount++
+          totalBonus += 2.0
+        }
+      })
+
+      return {
+        totalBonus,
+        femaleCount,
+        juniorMaleCount,
+        juniorFemaleCount,
+        details: [
+          { type: "Female", count: femaleCount, bonus: femaleCount * 1.5 },
+          { type: "Junior Male", count: juniorMaleCount, bonus: juniorMaleCount * 1.0 },
+          { type: "Junior Female", count: juniorFemaleCount, bonus: juniorFemaleCount * 2.0 },
+        ].filter((item) => item.count > 0),
+      }
+    }
+
+    // For National teams, use the team's custom rules
+    if (isNational && activeTeam?.rules) {
+      const rules = activeTeam.rules
+      let totalBonus = 0
+      let femaleCount = 0
+      let juniorMaleCount = 0
+      let juniorFemaleCount = 0
+      let femaleAbleBodyCount = 0
+
+      // Count players by category
+      selectedPlayers.forEach((player) => {
+        if (!player) return // Skip null/undefined players
+
+        const category = player.category || "Senior"
+
+        if (category === "Female") {
+          femaleCount++
+        } else if (category === "Junior") {
+          juniorMaleCount++
+        } else if (category === "Junior Female") {
+          juniorFemaleCount++
+        }
+
+        // Count female able-bodied players
+        if (player.isAbleBody && player.gender === "female") {
+          femaleAbleBodyCount++
+        }
+      })
+
+      // Apply bonuses based on team rules and limits
+      // If max value is -1 (unlimited), apply bonus to all players of that category
+      const femaleBonusCount = rules.maxFemales === -1 ? femaleCount : Math.min(femaleCount, rules.maxFemales)
+      const juniorBonusCount = rules.maxJuniors === -1 ? juniorMaleCount : Math.min(juniorMaleCount, rules.maxJuniors)
+      const juniorFemaleBonusCount =
+        rules.maxJuniorFemales === -1 ? juniorFemaleCount : Math.min(juniorFemaleCount, rules.maxJuniorFemales)
+
+      const femaleBonus = femaleBonusCount * (rules.femaleBonus || 0)
+      const juniorBonus = juniorBonusCount * (rules.juniorBonus || 0)
+      const juniorFemaleBonus = juniorFemaleBonusCount * (rules.juniorFemaleBonus || 0)
+      const femaleAbleBodyBonus = femaleAbleBodyCount * (rules.femaleAbleBodyBonus || 0)
+
+      totalBonus = femaleBonus + juniorBonus + juniorFemaleBonus + femaleAbleBodyBonus
+
+      return {
+        totalBonus,
+        femaleCount,
+        juniorMaleCount,
+        juniorFemaleCount,
+        femaleAbleBodyCount,
+        femaleBonusCount,
+        juniorBonusCount,
+        juniorFemaleBonusCount,
+        details: [
+          {
+            type: "Female",
+            count: femaleCount,
+            bonusCount: femaleBonusCount,
+            bonusPerPlayer: rules.femaleBonus || 0,
+            bonus: femaleBonus,
+          },
+          {
+            type: "Junior Male",
+            count: juniorMaleCount,
+            bonusCount: juniorBonusCount,
+            bonusPerPlayer: rules.juniorBonus || 0,
+            bonus: juniorBonus,
+          },
+          {
+            type: "Junior Female",
+            count: juniorFemaleCount,
+            bonusCount: juniorFemaleBonusCount,
+            bonusPerPlayer: rules.juniorFemaleBonus || 0,
+            bonus: juniorFemaleBonus,
+          },
+          {
+            type: "Female Able-Bodied",
+            count: femaleAbleBodyCount,
+            bonusCount: femaleAbleBodyCount,
+            bonusPerPlayer: rules.femaleAbleBodyBonus || 0,
+            bonus: femaleAbleBodyBonus,
+          },
+        ].filter((item) => item.count > 0),
+      }
+    }
+
+    // Default fallback
+    return {
+      totalBonus: 0,
+      details: [],
+    }
+  }
+
+  // Update the handlePlayerSelection function to use the new validation logic
   const handlePlayerSelection = (player, location) => {
     // If clicking on a court player
     if (location === "court") {
@@ -226,23 +443,50 @@ const CoachingBoard = ({
       }
 
       // If a court player is already selected, attempt to swap
-      // Calculate what the new classification total would be
-      const courtPlayerClass = Number.parseFloat(selectedCourtPlayer.classification)
-      const benchPlayerClass = Number.parseFloat(player.classification)
+      // Check if the swap would exceed the limit using our updated validation logic
+      if (wouldExceedLimit(player)) {
+        // Get the current total without the selected court player
+        const remainingPlayers = playersOnCourt.filter((p) => p.id !== selectedCourtPlayer.id)
+        const simulatedLineup = [...remainingPlayers, player]
+        const totalClassification = simulatedLineup.reduce((sum, p) => sum + Number.parseFloat(p.classification), 0)
 
-      // Get the current total without the selected court player
-      const remainingPlayers = playersOnCourt.filter((p) => p.id !== selectedCourtPlayer.id)
-      const remainingClassification = calculateLineupClassification(remainingPlayers)
+        // Calculate bonuses
+        const bonuses = calculateBonuses(simulatedLineup)
+        const bonusPoints = bonuses.totalBonus
 
-      // Calculate new total with the bench player added
-      const newTotal = remainingClassification + benchPlayerClass
-      const maxClassification = activeTeam?.competitionLevel === "International" ? 14.0 : 14.5
-
-      // Check if the swap would exceed the limit
-      if (newTotal > maxClassification) {
-        setSwapErrorMessage(
-          `Cannot swap players: Total classification would exceed the ${maxClassification.toFixed(1)} limit (${newTotal.toFixed(1)})`,
-        )
+        // Determine the appropriate error message based on the validation failure
+        if (isInternational && totalClassification > 14.0) {
+          setSwapErrorMessage(
+            `Cannot swap players: Total classification would exceed the 14.0 limit (${totalClassification.toFixed(1)})`,
+          )
+        } else if ((isEuroCup || isNational) && totalClassification - bonusPoints > 14.5) {
+          setSwapErrorMessage(
+            `Cannot swap players: Base classification minus bonuses (${(totalClassification - bonusPoints).toFixed(1)}) exceeds the limit of 14.5`,
+          )
+        } else if (isEuroCup && totalClassification > 17.0) {
+          setSwapErrorMessage(
+            `Cannot swap players: Total classification (${totalClassification.toFixed(1)}) exceeds the maximum allowed (17.0) for EuroCup`,
+          )
+        } else if (isNational && activeTeam?.rules && totalClassification > activeTeam.rules.maxPointsAllowed) {
+          setSwapErrorMessage(
+            `Cannot swap players: Total classification (${totalClassification.toFixed(1)}) exceeds the maximum allowed (${activeTeam.rules.maxPointsAllowed.toFixed(1)}) for National`,
+          )
+        } else if (isNational && activeTeam?.rules) {
+          // Check for other rule violations
+          const foreignPlayers = simulatedLineup.filter((p) => p.isForeign)
+          if (activeTeam.rules.maxForeignPlayers !== -1 && foreignPlayers.length > activeTeam.rules.maxForeignPlayers) {
+            setSwapErrorMessage(
+              `Cannot swap players: Maximum ${activeTeam.rules.maxForeignPlayers} foreign players allowed`,
+            )
+          } else {
+            const ableBodyPlayers = simulatedLineup.filter((p) => p.isAbleBody)
+            if (ableBodyPlayers.length > activeTeam.rules.maxAbleBodyPlayers) {
+              setSwapErrorMessage(
+                `Cannot swap players: Maximum ${activeTeam.rules.maxAbleBodyPlayers} able-bodied players allowed`,
+              )
+            }
+          }
+        }
 
         // Mark the bench player as exceeding limit but don't clear selections yet
         setSelectedBenchPlayer(player)
@@ -290,20 +534,12 @@ const CoachingBoard = ({
     }
   }
 
-  // Add this function to check if a player exceeds classification limit when swapped
-  const wouldExceedLimit = (benchPlayer) => {
+  // Update the isPlayerEligibleForCourt function to use the new validation logic
+  const isPlayerEligibleForCourt = (player) => {
     if (!selectedCourtPlayer) return false
 
-    // Get the current total without the selected court player
-    const remainingPlayers = playersOnCourt.filter((p) => p.id !== selectedCourtPlayer.id)
-    const remainingClassification = calculateLineupClassification(remainingPlayers)
-
-    // Calculate new total with the bench player added
-    const benchPlayerClass = Number.parseFloat(benchPlayer.classification)
-    const newTotal = remainingClassification + benchPlayerClass
-    const maxClassification = activeTeam?.competitionLevel === "International" ? 14.0 : 14.5
-
-    return newTotal > maxClassification
+    // A player is eligible if swapping wouldn't exceed the limit
+    return !wouldExceedLimit(player)
   }
 
   // Add this function to check if a player is selected
@@ -315,12 +551,6 @@ const CoachingBoard = ({
   }
 
   // Add a function to check if a bench player is eligible for swapping onto the court
-  const isPlayerEligibleForCourt = (player) => {
-    if (!showEligibleIndicators) return false
-
-    const playerClassification = Number.parseFloat(player.classification)
-    return playerClassification <= availableClassificationSpace
-  }
 
   // Helper function to calculate lineup classification total
   const calculateLineupClassification = (players) => {
@@ -511,7 +741,15 @@ const CoachingBoard = ({
 
     // Only show save form if we have meaningful frames (more than just the initial state)
     if (recordedFrames.length > 1) {
+      // Preserve the current lineup selection when showing the save form
+      const currentLineupSelection = selectedLineupId
+
       setShowSaveForm(true)
+
+      // Ensure the lineup selection is maintained
+      if (currentLineupSelection) {
+        setSelectedLineupId(currentLineupSelection)
+      }
     } else {
       setNotification({ show: true, message: "No actions recorded. Try again." })
       setTimeout(() => setNotification({ show: false, message: "" }), 3000)
@@ -528,6 +766,71 @@ const CoachingBoard = ({
 
   // Modify the recording useEffect to use our improved logic
   // Replace the existing recording useEffect with this one
+
+  // Define captureFrameIfNeeded here
+  const captureFrameIfNeeded = () => {
+    if (!recordingActive || !isRecording) return
+
+    const currentTime = Date.now()
+    const elapsedTime = currentTime - recordingStartTime
+
+    // Check if enough time has passed since the last frame
+    if (lastActionTimestamp && currentTime - lastActionTimestamp < 23) {
+      // 100ms = ~10fps - don't capture too frequently
+      return
+    }
+
+    // Check if there are significant changes since the last frame
+    if (previousFrameState && !hasSignificantChanges(previousFrameState)) {
+      return
+    }
+
+    // Capture the current state
+    const newFrame = {
+      timestamp: elapsedTime,
+      playerPositions: { ...playerPositions },
+      opponentPositions: { ...opponentPositions },
+      opponents: [...opponents],
+      drawings: [...drawings],
+      basketballs: [...basketballs],
+    }
+
+    // Update recorded frames and last action timestamp
+    setRecordedFrames((prev) => [...prev, newFrame])
+    setPreviousFrameState(newFrame)
+    setLastActionTimestamp(currentTime)
+  }
+
+  // Define hasSignificantChanges here
+  const hasSignificantChanges = (previousFrame) => {
+    // Check player positions
+    for (const playerId in playerPositions) {
+      if (!previousFrame.playerPositions[playerId]) return true // New player
+      const dx = playerPositions[playerId].x - previousFrame.playerPositions[playerId].x
+      const dy = playerPositions[playerId].y - previousFrame.playerPositions[playerId].y
+      if (Math.abs(dx) > significantChangeThreshold || Math.abs(dy) > significantChangeThreshold) return true
+    }
+
+    // Check opponent positions
+    for (const opponentId in opponentPositions) {
+      if (!previousFrame.opponentPositions[opponentId]) return true // New opponent
+      const dx = opponentPositions[opponentId].x - previousFrame.opponentPositions[opponentId].x
+      const dy = opponentPositions[opponentId].y - previousFrame.opponentPositions[opponentId].y
+      if (Math.abs(dx) > significantChangeThreshold || Math.abs(dy) > significantChangeThreshold) return true
+    }
+
+    // Check for new opponents
+    if (opponents.length !== previousFrame.opponents.length) return true
+
+    // Check for new drawings
+    if (drawings.length !== previousFrame.drawings.length) return true
+
+    // Check for new basketballs
+    if (basketballs.length !== previousFrame.basketballs.length) return true
+
+    return false
+  }
+
   useEffect(() => {
     if (recordingActive && isRecording) {
       // Use requestAnimationFrame for smoother recording
@@ -550,7 +853,7 @@ const CoachingBoard = ({
   useEffect(() => {
     if (isPlaying && recordedFrames.length > 0) {
       // Calculate the actual interval based on playback speed
-      const interval = 16 / playbackSpeed // Base on 60fps, adjusted by speed
+      const interval = 1000 / (30 * playbackSpeed) // Base on 30fps, adjusted by speed
 
       playbackRef.current = setInterval(() => {
         setCurrentFrame((prev) => {
@@ -585,10 +888,20 @@ const CoachingBoard = ({
         let startTime
         let animationFrameId
 
-        const animate = (timestamp) => {
+        let lastRenderTime = 0
+
+        const animate = (timestamp) => { 
           if (!startTime) startTime = timestamp
-          const elapsed = timestamp - startTime
-          const progress = Math.min(elapsed / frameDuration, 1)
+
+            // Throttle to ~60fps for smoother rendering on tablets
+            if (timestamp - lastRenderTime < 1000 / 60) {
+              animationFrameId = requestAnimationFrame(animate)
+              return
+            }
+            lastRenderTime = timestamp
+
+            const elapsed = Math.min(timestamp - startTime, normalizedFrames[normalizedFrames.length - 1].timestamp)
+            const progress = Math.min(elapsed / frameDuration, 1)
 
           // Get interpolated frame
           const interpolatedFrame = getInterpolatedFrame(frame, nextFrame, progress)
@@ -1125,6 +1438,8 @@ const CoachingBoard = ({
       basketballs,
       isStatic: true,
       createdAt: new Date().toISOString(),
+      // Store the current lineup ID with the system
+      lineupId: selectedLineupId || lastSelectedLineupIdRef.current,
     }
 
     setSavedSystems((prev) => [...prev, system])
@@ -1150,6 +1465,8 @@ const CoachingBoard = ({
       frames: recordedFrames,
       createdAt: new Date().toISOString(),
       isDynamic: true,
+      // Store the lineup ID with the system to maintain context
+      lineupId: selectedLineupId || lastSelectedLineupIdRef.current,
     }
 
     setSavedSystems((prev) => [...prev, newSystem])
@@ -1158,6 +1475,8 @@ const CoachingBoard = ({
     setNotification({ show: true, message: "Dynamic System Saved Successfully" })
     setTimeout(() => setNotification({ show: false, message: "" }), 3000)
 
+    // Don't reset the lineup selection after saving
+    // The key is to NOT modify selectedLineupId here
     return true
   }
 
@@ -1196,6 +1515,12 @@ const CoachingBoard = ({
       drawings: frame.drawings || [],
       basketballs: frame.basketballs || [],
     }))
+
+    // If the system has a stored lineup ID and no lineup is currently selected,
+    // restore that lineup selection
+    if (system.lineupId && !selectedLineupId) {
+      setSelectedLineupId(system.lineupId)
+    }
 
     setRecordedFrames(processedFrames)
     setCurrentFrame(0)
@@ -1286,7 +1611,7 @@ const CoachingBoard = ({
     const totalDuration = normalizedFrames[normalizedFrames.length - 1].timestamp - normalizedFrames[0].timestamp
 
     // Target a consistent frame rate of 60fps
-    const targetFrameDuration = 16.67 // ~60fps in ms
+    const targetFrameDuration = 20 // ~50fps in ms
 
     // Identify and fix large gaps or bunched frames
     for (let i = 1; i < normalizedFrames.length; i++) {
@@ -1411,11 +1736,7 @@ const CoachingBoard = ({
     // If we're in the first half of the transition, use frame1's drawings
     // If we're in the second half, use frame2's drawings
     // This prevents the flickering effect when drawings change
-    if (progress < 0.5) {
-      interpolatedFrame.drawings = [...frame1.drawings]
-    } else {
-      interpolatedFrame.drawings = [...frame2.drawings]
-    }
+    interpolatedFrame.drawings = [...frame2.drawings]
 
     return interpolatedFrame
   }
@@ -1427,12 +1748,29 @@ const CoachingBoard = ({
       let startTime = null
       let lastFrameIndex = 0
 
+      // Track last applied values to avoid unnecessary state updates
+      let lastAppliedPlayerPositions = null
+      let lastAppliedOpponentPositions = null
+      let lastAppliedOpponents = null
+      let lastAppliedDrawings = null
+      let lastAppliedBasketballs = null
+
       // Pre-process frames to normalize time gaps
       const normalizedFrames = normalizeFrameTimingFunc(recordedFrames)
 
+      let lastRenderTime = 0
+
       const animate = (timestamp) => {
         if (!startTime) startTime = timestamp
-        const elapsed = timestamp - startTime
+
+          // Throttle to ~60fps for smoother rendering on tablets
+          if (timestamp - lastRenderTime < 1000 / 60) {
+            animationFrameId = requestAnimationFrame(animate)
+            return
+          }
+          lastRenderTime = timestamp
+
+          const elapsed = Math.min(timestamp - startTime, normalizedFrames[normalizedFrames.length - 1].timestamp)
 
         // Calculate which frame we should be at based on elapsed time and playback speed
         const targetTime = elapsed * playbackSpeed
@@ -1478,30 +1816,74 @@ const CoachingBoard = ({
             Math.min(1, Math.max(0, frameProgress)),
           )
 
-          // Update positions with requestAnimationFrame for smoother rendering
-          setPlayerPositions(interpolatedFrame.playerPositions)
-          setOpponentPositions(interpolatedFrame.opponentPositions)
-          setOpponents(interpolatedFrame.opponents)
-          setDrawings(interpolatedFrame.drawings)
-          setBasketballs(interpolatedFrame.basketballs)
+          // Only update state if values have changed (shallow equality check)
+          // This prevents unnecessary re-renders and improves performance
 
-          // Only update drawings when necessary to improve performance
-          // This prevents flickering by avoiding too many re-renders
-          if (frameIndex !== lastFrameIndex || Math.abs(frameProgress - 0.5) < 0.05) {
-            setDrawings(interpolatedFrame.drawings)
+          // Update player positions only if they've changed
+          if (!shallowEqual(interpolatedFrame.playerPositions, lastAppliedPlayerPositions)) {
+            setPlayerPositions(interpolatedFrame.playerPositions)
+            lastAppliedPlayerPositions = interpolatedFrame.playerPositions
           }
 
-          setBasketballs(interpolatedFrame.basketballs)
+          // Update opponent positions only if they've changed
+          if (!shallowEqual(interpolatedFrame.opponentPositions, lastAppliedOpponentPositions)) {
+            setOpponentPositions(interpolatedFrame.opponentPositions)
+            lastAppliedOpponentPositions = interpolatedFrame.opponentPositions
+          }
+
+          // Update opponents only if they've changed
+          if (!shallowEqual(interpolatedFrame.opponents, lastAppliedOpponents)) {
+            setOpponents(interpolatedFrame.opponents)
+            lastAppliedOpponents = interpolatedFrame.opponents
+          }
+
+          // Update drawings only if they've changed or at key points to ensure smooth transitions
+          if (
+            !shallowEqual(interpolatedFrame.drawings, lastAppliedDrawings) ||
+            frameIndex !== lastFrameIndex ||
+            Math.abs(lastAppliedDrawings) ||
+            frameIndex !== lastFrameIndex ||
+            Math.abs(frameProgress - 0.5) < 0.05
+          ) {
+            setDrawings(interpolatedFrame.drawings)
+            lastAppliedDrawings = interpolatedFrame.drawings
+          }
+
+          // Update basketballs only if they've changed
+          if (!shallowEqual(interpolatedFrame.basketballs, lastAppliedBasketballs)) {
+            setBasketballs(interpolatedFrame.basketballs)
+            lastAppliedBasketballs = interpolatedFrame.basketballs
+          }
 
           // Track the last frame we rendered
           lastFrameIndex = frameIndex
         } else {
           // If there's no next frame, just use the current frame
-          setPlayerPositions(currentKeyframe.playerPositions)
-          setOpponentPositions(currentKeyframe.opponentPositions)
-          setOpponents(currentKeyframe.opponents)
-          setDrawings(currentKeyframe.drawings)
-          setBasketballs(currentKeyframe.basketballs)
+          // Only update if values have changed
+          if (!shallowEqual(currentKeyframe.playerPositions, lastAppliedPlayerPositions)) {
+            setPlayerPositions(currentKeyframe.playerPositions)
+            lastAppliedPlayerPositions = currentKeyframe.playerPositions
+          }
+
+          if (!shallowEqual(currentKeyframe.opponentPositions, lastAppliedOpponentPositions)) {
+            setOpponentPositions(currentKeyframe.opponentPositions)
+            lastAppliedOpponentPositions = currentKeyframe.opponentPositions
+          }
+
+          if (!shallowEqual(currentKeyframe.opponents, lastAppliedOpponents)) {
+            setOpponents(currentKeyframe.opponents)
+            lastAppliedOpponents = currentKeyframe.opponents
+          }
+
+          if (!shallowEqual(currentKeyframe.drawings, lastAppliedDrawings)) {
+            setDrawings(currentKeyframe.drawings)
+            lastAppliedDrawings = currentKeyframe.drawings
+          }
+
+          if (!shallowEqual(currentKeyframe.basketballs, lastAppliedBasketballs)) {
+            setBasketballs(currentKeyframe.basketballs)
+            lastAppliedBasketballs = currentKeyframe.basketballs
+          }
         }
 
         // Continue animation if still playing
@@ -1520,110 +1902,41 @@ const CoachingBoard = ({
     }
   }, [isPlaying, recordedFrames, playbackSpeed])
 
-  // Enhance the handleMouseMove function to capture more drawing points
+  // Add a helper function for shallow equality checks
+  const shallowEqual = (obj1, obj2) => {
+    if (obj1 === obj2) return true
+    if (!obj1 || !obj2) return false
 
-  // Enhance the recording useEffect for smoother frame capture
-  useEffect(() => {
-    if (recordingActive && isRecording) {
-      // Use requestAnimationFrame for smoother recording at 60fps
-      let animationFrameId
-      let lastFrameTime = 0
-      const targetFrameInterval = 16.67 // Target ~60fps
+    // For arrays, check length first
+    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+      if (obj1.length !== obj2.length) return false
+      // For arrays of objects (like opponents), we'll do a simple length check
+      // A more thorough check would compare each item, but that might be too expensive
+      return true
+    }
 
-      const recordFrame = (timestamp) => {
-        // Calculate time since last frame
-        const elapsed = timestamp - lastFrameTime
+    // For objects like positions, check if keys and values match
+    const keys1 = Object.keys(obj1)
+    const keys2 = Object.keys(obj2)
 
-        // Only capture frames at our target interval
-        if (elapsed >= targetFrameInterval) {
-          captureFrameIfNeeded()
-          lastFrameTime = timestamp
+    if (keys1.length !== keys2.length) return false
+
+    // For position objects, we'll do a quick check of a few keys
+    // This is faster than checking every key but still catches most changes
+    const sampleSize = Math.min(5, keys1.length)
+    for (let i = 0; i < sampleSize; i++) {
+      const key = keys1[i]
+      // For nested objects like positions with x,y coordinates
+      if (typeof obj1[key] === "object" && typeof obj2[key] === "object") {
+        if (obj1[key].x !== obj2[key].x || obj1[key].y !== obj2[key].y) {
+          return false
         }
-
-        animationFrameId = requestAnimationFrame(recordFrame)
-      }
-
-      animationFrameId = requestAnimationFrame(recordFrame)
-
-      return () => {
-        cancelAnimationFrame(animationFrameId)
+      } else if (obj1[key] !== obj2[key]) {
+        return false
       }
     }
-  }, [
-    recordingActive,
-    isRecording,
-    playerPositions,
-    opponentPositions,
-    opponents,
-    drawings,
-    basketballs,
-    currentDrawing,
-    isDrawing,
-  ])
 
-  // Function to determine if there are significant changes in the current state
-  const hasSignificantChanges = () => {
-    if (!previousFrameState) return true
-
-    // Check player positions
-    for (const playerId in playerPositions) {
-      if (!previousFrameState.playerPositions[playerId]) return true // New player
-      const dx = playerPositions[playerId].x - previousFrameState.playerPositions[playerId].x
-      const dy = playerPositions[playerId].y - previousFrameState.playerPositions[playerId].y
-      if (Math.abs(dx) > significantChangeThreshold || Math.abs(dy) > significantChangeThreshold) return true
-    }
-
-    // Check opponent positions
-    for (const opponentId in opponentPositions) {
-      if (!previousFrameState.opponentPositions[opponentId]) return true // New opponent
-      const dx = opponentPositions[opponentId].x - previousFrameState.opponentPositions[opponentId].x
-      const dy = opponentPositions[opponentId].y - previousFrameState.opponentPositions[opponentId].y
-      if (Math.abs(dx) > significantChangeThreshold || Math.abs(dy) > significantChangeThreshold) return true
-    }
-
-    // Check basketball positions
-    for (const ball of basketballs) {
-      const prevBall = previousFrameState.basketballs.find((b) => b.id === ball.id)
-      if (!prevBall) return true // New ball
-      const dx = ball.position.x - prevBall.position.x
-      const dy = ball.position.y - prevBall.position.y
-      if (Math.abs(dx) > significantChangeThreshold || Math.abs(dy) > significantChangeThreshold) return true
-    }
-
-    // Check if drawings have changed
-    if (drawings.length !== previousFrameState.drawings.length) return true
-
-    return false
-  }
-
-  // Optimized captureFrameIfNeeded function
-  const captureFrameIfNeeded = () => {
-    if (!isRecording || !recordingActive) return
-
-    // Check if enough time has passed since the last action
-    const now = Date.now()
-    if (lastActionTimestamp && now - lastActionTimestamp < 16) {
-      // 16ms = ~60fps
-      return
-    }
-
-    // Check if there are significant changes
-    if (hasSignificantChanges()) {
-      const elapsedTime = Date.now() - recordingStartTime
-
-      const newFrame = {
-        timestamp: elapsedTime,
-        playerPositions: { ...playerPositions },
-        opponentPositions: { ...opponentPositions },
-        opponents: [...opponents],
-        drawings: [...drawings],
-        basketballs: [...basketballs],
-      }
-
-      setRecordedFrames((prev) => [...prev, newFrame])
-      setPreviousFrameState(newFrame)
-      setLastActionTimestamp(now)
-    }
+    return true
   }
 
   const handleMouseMove = (e) => {
@@ -1631,6 +1944,37 @@ const CoachingBoard = ({
   }
 
   const getInterpolatedFrame = getInterpolatedFrameFunc
+
+  // Add a touch-specific effect to ensure lineup selection persists
+  // This will run when the save form is shown/hidden
+  // Update the useEffect that handles lineup selection persistence
+  // Replace the existing useEffect that runs when showSaveForm changes with this improved version:
+  useEffect(() => {
+    // This effect specifically targets the issue on touch devices
+    // by ensuring the lineup selection is preserved when the save form
+    // appears and disappears
+    if (!showSaveForm && lastSelectedLineupIdRef.current) {
+      // Small delay to ensure the lineup is still selected after form closes
+      const timeoutId = setTimeout(() => {
+        // Re-select the lineup if it was somehow deselected
+        const lineupExists = teamLineups.some((lineup) => lineup.id === lastSelectedLineupIdRef.current)
+        if (lineupExists) {
+          // Force a re-selection of the lineup to ensure it's properly applied
+          setSelectedLineupId(lastSelectedLineupIdRef.current)
+        }
+      }, 50)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [showSaveForm, teamLineups])
+
+  // Add an effect to update the ref whenever selectedLineupId changes
+  // Add this new useEffect after the other useEffects
+  useEffect(() => {
+    if (selectedLineupId) {
+      lastSelectedLineupIdRef.current = selectedLineupId
+    }
+  }, [selectedLineupId])
 
   return (
     <div className="coaching-board-container">
@@ -1891,7 +2235,7 @@ const CoachingBoard = ({
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <option value="0.5">Slow</option>
-                                    <option value="1">Normal</option>
+                                    <option value="0.75">Normal</option>
                                     <option value="2">Fast</option>
                                   </select>
                                 </div>
@@ -2150,6 +2494,158 @@ const CoachingBoard = ({
               handleBasketballDragEnd()
             }
           }}
+          // Add touch event handlers for mobile/tablet support
+          onTouchStart={(e) => {
+            // Convert touch event to mouse event format
+            const touch = e.touches[0]
+            const mouseEvent = {
+              clientX: touch.clientX,
+              clientY: touch.clientY,
+              stopPropagation: () => e.stopPropagation(),
+            }
+
+            // Call the mouse event handler with our converted event
+            handleMouseDown(mouseEvent)
+
+            // Handle eraser tap if in eraser mode
+            if (eraserMode) {
+              handleEraserTap(mouseEvent)
+            }
+          }}
+          onTouchMove={(e) => {
+            if (!e.touches[0]) return
+
+            const touch = e.touches[0]
+            const mouseEvent = {
+              clientX: touch.clientX,
+              clientY: touch.clientY,
+              stopPropagation: () => e.stopPropagation(),
+            }
+
+            // Handle drawing
+            if (isDrawing && !isPlaying) {
+              handleMouseMove(mouseEvent)
+            }
+
+            // Handle opponent dragging
+            if (draggedOpponent && !isPlaying) {
+              handleOpponentDrag(mouseEvent, draggedOpponent)
+
+              // Record intermediate states during dragging if recording
+              if (isRecording && recordingStartTime) {
+                const elapsedTime = Date.now() - recordingStartTime
+                if (elapsedTime % 32 === 0) {
+                  setRecordedFrames((prev) => [
+                    ...prev,
+                    {
+                      timestamp: elapsedTime,
+                      playerPositions: { ...playerPositions },
+                      opponentPositions: { ...opponentPositions },
+                      opponents: [...opponents],
+                      drawings: [...drawings],
+                      basketballs: [...basketballs],
+                    },
+                  ])
+                }
+              }
+            }
+
+            // Handle player dragging
+            if (draggedPlayer && !isPlaying) {
+              const courtRect = courtRef.current.getBoundingClientRect()
+              const x = touch.clientX - courtRect.left
+              const y = touch.clientY - courtRect.top
+
+              // Keep player within court bounds
+              const clampedX = Math.max(15, Math.min(courtSize.width - 15, x))
+              const clampedY = Math.max(15, Math.min(courtSize.height - 15, y))
+
+              // Update position
+              setPlayerPositions((prev) => ({
+                ...prev,
+                [draggedPlayer]: { x: clampedX, y: clampedY },
+              }))
+
+              // Record intermediate states during dragging if recording
+              if (isRecording && recordingStartTime) {
+                const elapsedTime = Date.now() - recordingStartTime
+                if (elapsedTime % 32 === 0) {
+                  setRecordedFrames((prev) => [
+                    ...prev,
+                    {
+                      timestamp: elapsedTime,
+                      playerPositions: { ...playerPositions },
+                      opponentPositions: { ...opponentPositions },
+                      opponents: [...opponents],
+                      drawings: [...drawings],
+                      basketballs: [...basketballs],
+                    },
+                  ])
+                }
+              }
+            }
+
+            // Handle basketball dragging
+            if (draggedBasketball && !isPlaying) {
+              const courtRect = courtRef.current.getBoundingClientRect()
+              const x = touch.clientX - courtRect.left
+              const y = touch.clientY - courtRect.top
+
+              // Keep ball within court bounds
+              const clampedX = Math.max(15, Math.min(courtSize.width - 15, x))
+              const clampedY = Math.max(15, Math.min(courtSize.height - 15, y))
+
+              // Update basketball position
+              setBasketballs((prev) => {
+                return prev.map((ball) => {
+                  if (ball.id === draggedBasketball.id) {
+                    return {
+                      ...ball,
+                      position: { x: clampedX, y: clampedY },
+                    }
+                  }
+                  return ball
+                })
+              })
+
+              // Record intermediate states during dragging if recording
+              if (isRecording && recordingStartTime) {
+                const elapsedTime = Date.now() - recordingStartTime
+                if (elapsedTime % 32 === 0) {
+                  setRecordedFrames((prev) => [
+                    ...prev,
+                    {
+                      timestamp: elapsedTime,
+                      playerPositions: { ...playerPositions },
+                      opponentPositions: { ...opponentPositions },
+                      opponents: [...opponents],
+                      drawings: [...drawings],
+                      basketballs: [...basketballs],
+                    },
+                  ])
+                }
+              }
+            }
+          }}
+          onTouchEnd={(e) => {
+            // Handle drawing end
+            handleMouseUp()
+
+            // Release any dragged opponent
+            if (draggedOpponent) {
+              setDraggedOpponent(null)
+            }
+
+            // Release any dragged player
+            if (draggedPlayer) {
+              handlePlayerDragEnd()
+            }
+
+            // Release any dragged basketball
+            if (draggedBasketball) {
+              handleBasketballDragEnd()
+            }
+          }}
         >
           <BasketballCourt />
 
@@ -2200,6 +2696,11 @@ const CoachingBoard = ({
                   e.stopPropagation()
                   handleBasketballDragStart(ball.id)
                 }}
+                onTouchStart={(e) => {
+                  if (isPlaying) return
+                  e.stopPropagation()
+                  handleBasketballDragStart(ball.id)
+                }}
               />
             ))}
           </div>
@@ -2228,6 +2729,16 @@ const CoachingBoard = ({
                 // Separate click handler for removal - only triggered on actual clicks, not drags
                 onDoubleClick={(e) => {
                   removeOpponent(opponent.id)
+                  e.stopPropagation()
+                }}
+                onTouchStart={(e) => {
+                  if (isPlaying) return
+                  e.stopPropagation()
+                  setDraggedOpponent(opponent.id)
+                }}
+                onTouchEnd={(e) => {
+                  // Just release the drag without removing the opponent
+                  setDraggedOpponent(null)
                   e.stopPropagation()
                 }}
                 title="Drag to move, double-click to remove"
@@ -2299,7 +2810,7 @@ const CoachingBoard = ({
             <label htmlFor="lineup-select">Select Lineup:</label>
             <select
               id="lineup-select"
-              value={selectedLineupId}
+              value={selectedLineupId || lastSelectedLineupIdRef.current || ""}
               onChange={handleLineupChange}
               className="lineup-dropdown"
             >
@@ -2441,4 +2952,5 @@ const CoachingBoard = ({
 }
 
 export default CoachingBoard
+
 

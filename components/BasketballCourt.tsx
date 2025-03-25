@@ -2,7 +2,7 @@
 
 // Make sure CSS import is at the top of the file
 import "./BasketballCourt.css"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 
 const BasketballCourt = () => {
   const [selectedPlayerForFouls, setSelectedPlayerForFouls] = useState(null)
@@ -27,6 +27,29 @@ const BasketballCourt = () => {
   const setPlayers = () => {}
   const selectedPlayer = null
   const handlePlayerClick = () => {}
+
+  const svgRef = useRef(null)
+
+  useEffect(() => {
+    const svgElement = svgRef.current
+
+    if (!svgElement) return
+
+    // Function to prevent default on touch events
+    const preventScroll = (e) => {
+      e.preventDefault()
+    }
+
+    // Add event listeners
+    svgElement.addEventListener("touchstart", preventScroll, { passive: false })
+    svgElement.addEventListener("touchmove", preventScroll, { passive: false })
+
+    // Cleanup
+    return () => {
+      svgElement.removeEventListener("touchstart", preventScroll)
+      svgElement.removeEventListener("touchmove", preventScroll)
+    }
+  }, [])
 
   const renderPlayer = (player, location) => {
     // Existing code...
@@ -77,7 +100,7 @@ const BasketballCourt = () => {
 
   return (
     <>
-      <svg className="basketball-court" viewBox="0 0 940 500" preserveAspectRatio="xMidYMid meet">
+      <svg className="basketball-court" viewBox="0 0 940 500" preserveAspectRatio="xMidYMid meet" ref={svgRef}>
         {/* Court outline */}
         <rect x="10" y="10" width="920" height="480" fill="#f8f8f8" stroke="#000" strokeWidth="2" />
 
@@ -143,4 +166,5 @@ const BasketballCourt = () => {
 }
 
 export default BasketballCourt
+
 

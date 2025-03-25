@@ -5,6 +5,7 @@
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #000000;
+  touch-action: none; /* Prevent browser default touch actions */
 }
 
 /* Improve the court styling */
@@ -73,4 +74,5 @@
     min-height: 300px;
   }
 }
+
 
