@@ -1,0 +1,51 @@
+.how-it-works-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #4b5563; /* Grey background */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto; /* Push to the right side of flex container */
+  height: fit-content; /* Match height to content */
+}
+
+.how-it-works-button:hover {
+  background-color: #374151; /* Darker grey on hover */
+}
+
+.question-mark-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.button-text {
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .how-it-works-button {
+    padding: 8px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .button-text {
+    display: none;
+  }
+}
+
+

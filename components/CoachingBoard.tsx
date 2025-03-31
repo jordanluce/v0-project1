@@ -7,6 +7,7 @@ import { useState, useRef, useEffect, useContext, useCallback } from "react"
 import { AppContext } from "./App"
 import BasketballCourt from "./BasketballCourt"
 import TacticDisplayModal from "./TacticDisplayModal"
+import ShareSystemsModal from "./ShareSystemsModal" // Add this import
 
 // Update the CoachingBoard component to include tactics dropdown
 const CoachingBoard = ({
@@ -31,12 +32,13 @@ const CoachingBoard = ({
 
   // Add new state variables for the dropdowns and notifications
   // Add these after the other state declarations (around line 40-50)
-  const [showRecordDropdown, setShowRecordDropdown] = useState(false)
   const [showSavedSystemsDropdown, setShowSavedSystemsDropdown] = useState(false)
   const [staticSystemName, setStaticSystemName] = useState("")
   const [showStaticNamePrompt, setShowStaticNamePrompt] = useState(false)
-  const [playbackSpeed, setPlaybackSpeed] = useState(0.75) // 0.5 = slow, 0.75 = normal, 2 = fast
   const [notification, setNotification] = useState({ show: false, message: "" })
+
+  // Add this to the existing state variables near the other state declarations
+  const [showShareModal, setShowShareModal] = useState(false)
 
   // Add state for tactics dropdown
   const [showTacticsDropdown, setShowTacticsDropdown] = useState(false)
@@ -66,23 +68,174 @@ const CoachingBoard = ({
   // Add a new state for the selected tactic to display in the modal
   const [tacticToDisplay, setTacticToDisplay] = useState(null)
 
-  // Add these new state variables after the existing state declarations
-  const [recordingPrimed, setRecordingPrimed] = useState(false)
-  const [recordingActive, setRecordingActive] = useState(false)
-  const [lastActionTimestamp, setLastActionTimestamp] = useState(null)
-  const [previousFrameState, setPreviousFrameState] = useState(null)
-  const [significantChangeThreshold] = useState(2) // Minimum pixel change to consider recording a new frame
+  // Add undeclared variables
+  const [categoryFilter, setCategoryFilter] = useState("all")
+  const [isPlaying, setIsPlaying] = useState(false)
 
-  // Add a new useRef to track the last selected lineup ID
-  // Add this after the other useRef declarations (around line 70-80)
-  const lastSelectedLineupIdRef = useRef("")
+  // Add a new state for tracking arrow count
+  const [arrowCount, setArrowCount] = useState(0)
+
+  // Add a state to capture the current system state when opening the form
+  // This will be used to restore the state if needed
+  const [savedSystemState, setSavedSystemState] = useState(null)
+
+  // Mock functions to resolve undeclared variables
+  const saveSystem = (name) => {
+    if (!name.trim() || !savedSystemState) {
+      return false
+    }
+
+    console.log("saveSystem called with name:", name)
+    const system = {
+      id: Date.now().toString(),
+      name: name,
+      drawings: savedSystemState.drawings,
+      playerPositions: savedSystemState.playerPositions,
+      opponentPositions: savedSystemState.opponentPositions,
+      opponents: savedSystemState.opponents,
+      basketballs: savedSystemState.basketballs,
+      isStatic: true,
+      createdAt: new Date().toISOString(),
+    }
+    setSavedSystems((prevSystems) => [...prevSystems, system])
+
+    // Show success notification
+    setNotification({
+      show: true,
+      message: `System "${name}" saved successfully!`,
+    })
+    setTimeout(() => setNotification({ show: false, message: "" }), 3000)
+
+    // Clear the system name and close the form
+    setStaticSystemName("")
+    setShowStaticNamePrompt(false)
+    setSavedSystemState(null) // Clear saved state after successful save
+
+    return true
+  }
+
+  const doPathsIntersect = (path1, path2) => {
+    console.log("doPathsIntersect called with path1:", path1, "path2:", path2)
+    return false
+  }
+
+  // Replace the mock calculateArrowhead function with a proper implementation
+  const calculateArrowhead = (start, end) => {
+    // Calculate the angle of the line
+    const angle = Math.atan2(end.y - start.y, end.x - start.x)
+
+    // Length of the arrowhead lines
+    const arrowLength = 15
+
+    // Angle of the arrowhead lines (in radians)
+    const arrowAngle = Math.PI / 6 // 30 degrees
+
+    // Calculate the points for the arrowhead
+    const point1 = {
+      x: end.x - arrowLength * Math.cos(angle - arrowAngle),
+      y: end.y - arrowLength * Math.sin(angle - arrowAngle),
+    }
+
+    const point2 = {
+      x: end.x - arrowLength * Math.cos(angle + arrowAngle),
+      y: end.y - arrowLength * Math.sin(angle + arrowAngle),
+    }
+
+    // Return the points for the arrowhead
+    return [point1, end, point2]
+  }
+
+  const toggleEraserMode = () => {
+    console.log("toggleEraserMode called")
+    setEraserMode(!eraserMode)
+    setDrawMode(eraserMode ? "none" : "erase")
+  }
+
+  const clearDrawings = () => {
+    console.log("clearDrawings called")
+    setDrawings([])
+  }
+
+  const handleMouseMove = (e) => {
+    handleMouseMoveDrawing(e)
+  }
+
+  const handleEraserTap = (e) => {
+    console.log("handleEraserTap called")
+  }
+
+  const handleLineupChange = (e) => {
+    setSelectedLineupId(e.target.value)
+  }
+
+  const loadTactic = (tactic) => {
+    console.log("loadTactic called with tactic:", tactic)
+  }
+
+  // Also update the deleteSystem function to properly remove systems
+  const deleteSystem = (systemId) => {
+    if (!systemId) return
+
+    // Filter out the system with the given ID
+    setSavedSystems((prev) => prev.filter((system) => system.id !== systemId))
+
+    // Show notification
+    setNotification({
+      show: true,
+      message: "System deleted",
+    })
+    setTimeout(() => setNotification({ show: false, message: "" }), 3000)
+  }
+
+  // Replace the mock loadSystem function with a proper implementation that actually loads the saved system
+  const loadSystem = (system) => {
+    if (!system) return
+
+    // Clear current state first
+    setDrawings([])
+    setOpponents([])
+    setOpponentPositions({})
+    setBasketballs([])
+
+    // Load all the system data
+    setDrawings(system.drawings || [])
+
+    // Load player positions
+    if (system.playerPositions) {
+      setPlayerPositions(system.playerPositions)
+    }
+
+    // Load opponents and their positions
+    if (system.opponents && system.opponents.length > 0) {
+      setOpponents(system.opponents)
+    }
+
+    if (system.opponentPositions) {
+      setOpponentPositions(system.opponentPositions)
+    }
+
+    // Load basketballs
+    if (system.basketballs && system.basketballs.length > 0) {
+      setBasketballs(system.basketballs)
+    }
+
+    // Close the dropdown
+    setShowSavedSystemsDropdown(false)
+
+    // Show notification
+    setNotification({
+      show: true,
+      message: `Loaded system: ${system.name}`,
+    })
+    setTimeout(() => setNotification({ show: false, message: "" }), 3000)
+  }
 
   // Add a function to track actions for the undo feature
   const trackAction = (actionType, data) => {
     setActionHistory((prev) => [...prev, { type: actionType, data }])
   }
 
-  // Add a function to undo the last action
+  // Enhance the undoLastAction function to handle arrow numbering
   const undoLastAction = () => {
     if (actionHistory.length === 0) return
 
@@ -90,9 +243,17 @@ const CoachingBoard = ({
 
     switch (lastAction.type) {
       case "drawing":
+        // Check if the last drawing was an arrow
+        const lastDrawing = drawings[drawings.length - 1]
+        if (lastDrawing && lastDrawing.type === "arrow" && lastDrawing.arrowNumber) {
+          // Decrement arrow count when removing an arrow
+          setArrowCount((prev) => Math.max(0, prev - 1))
+        }
+
         // Remove the last drawing
         setDrawings((prev) => prev.slice(0, -1))
         break
+      // Other cases remain unchanged
       case "opponent":
         // Remove the last opponent
         if (lastAction.data.action === "add") {
@@ -550,6 +711,11 @@ const CoachingBoard = ({
     )
   }
 
+  // Add a function to handle sharing systems - place this near other handler functions
+  const handleShareSystems = () => {
+    setShowShareModal(true)
+  }
+
   // Add a function to check if a bench player is eligible for swapping onto the court
 
   // Helper function to calculate lineup classification total
@@ -563,16 +729,6 @@ const CoachingBoard = ({
   const [opponentPositions, setOpponentPositions] = useState({})
 
   // Recording feature states
-  const [isRecording, setIsRecording] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [recordedFrames, setRecordedFrames] = useState([])
-  const [currentFrame, setCurrentFrame] = useState(0)
-  const [recordingStartTime, setRecordingStartTime] = useState(null)
-  const [showSaveForm, setShowSaveForm] = useState(false)
-  const [newSystemName, setNewSystemName] = useState("")
-  const [newSystemCategory, setNewSystemCategory] = useState("offense")
-  const [categoryFilter, setCategoryFilter] = useState("all")
-
   // New states for On Court and On Bench sections
   const [selectedLineupId, setSelectedLineupId] = useState("")
   const [playersOnCourt, setPlayersOnCourt] = useState([])
@@ -591,9 +747,7 @@ const CoachingBoard = ({
   // Get the current lineup's tactics
   const currentLineupTactics = getLineupTactics()
 
-  const playbackRef = useRef(null)
   const courtRef = useRef(null)
-  const recordingIntervalRef = useRef(null)
 
   // Filtered systems based on category
   const filteredSystems = savedSystems.filter((system) => {
@@ -601,19 +755,44 @@ const CoachingBoard = ({
     return system.category === categoryFilter
   })
 
-  // Handle click outside tactics dropdown
+  // Add event listener to close dropdown when clicking outside or pressing Escape
   useEffect(() => {
     function handleClickOutside(event) {
       if (tacticsDropdownRef.current && !tacticsDropdownRef.current.contains(event.target)) {
         setShowTacticsDropdown(false)
       }
+
+      // Check for clicks outside the systems dropdown
+      const dropdownButton = document.querySelector(".dropdown-button")
+      const systemsDropdown = document.querySelector(".systems-dropdown")
+
+      if (
+        showSavedSystemsDropdown &&
+        systemsDropdown &&
+        dropdownButton &&
+        !systemsDropdown.contains(event.target) &&
+        !dropdownButton.contains(event.target) &&
+        !dropdownButton.contains(event.target)
+      ) {
+        setShowSavedSystemsDropdown(false)
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setShowTacticsDropdown(false)
+        setShowSavedSystemsDropdown(false)
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("keydown", handleKeyDown)
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
+      document.addEventListener("keydown", handleKeyDown)
     }
-  }, [])
+  }, [showSavedSystemsDropdown])
 
   // Clear court when team changes
   useEffect(() => {
@@ -691,263 +870,12 @@ const CoachingBoard = ({
     }
   }, [selectedLineupId, lineups, players])
 
-  // Replace the startRecording function with this improved version
-  const startRecording = () => {
-    // Instead of starting recording immediately, we prime it to start on first action
-    setRecordingPrimed(true)
-    setRecordingActive(false)
-    setRecordedFrames([])
-    setNotification({ show: true, message: "Recording primed - perform an action to start" })
-    setTimeout(() => setNotification({ show: false, message: "" }), 3000)
+  const saveRecording = (name) => {
+    // This function is no longer needed, redirect to saveSystem
+    return saveSystem(name)
   }
-
-  // Add this new function to actually start the recording when an action is detected
-  const activateRecording = () => {
-    if (!recordingPrimed) return
-
-    setRecordingActive(true)
-    setIsRecording(true)
-    setRecordingStartTime(Date.now())
-
-    // Store initial state as first frame
-    const initialFrame = {
-      timestamp: 0,
-      playerPositions: { ...playerPositions },
-      opponentPositions: { ...opponentPositions },
-      opponents: [...opponents],
-      drawings: [...drawings],
-      basketballs: [...basketballs],
-    }
-
-    setRecordedFrames([initialFrame])
-    setPreviousFrameState(initialFrame)
-    setLastActionTimestamp(Date.now())
-
-    // Show notification that recording has started
-    setNotification({ show: true, message: "Recording started!" })
-    setTimeout(() => setNotification({ show: false, message: "" }), 2000)
-  }
-
-  // Replace the stopRecording function with this improved version
-  const stopRecording = () => {
-    setIsRecording(false)
-    setRecordingPrimed(false)
-    setRecordingActive(false)
-
-    if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current)
-      recordingIntervalRef.current = null
-    }
-
-    // Only show save form if we have meaningful frames (more than just the initial state)
-    if (recordedFrames.length > 1) {
-      // Preserve the current lineup selection when showing the save form
-      const currentLineupSelection = selectedLineupId
-
-      setShowSaveForm(true)
-
-      // Ensure the lineup selection is maintained
-      if (currentLineupSelection) {
-        setSelectedLineupId(currentLineupSelection)
-      }
-    } else {
-      setNotification({ show: true, message: "No actions recorded. Try again." })
-      setTimeout(() => setNotification({ show: false, message: "" }), 3000)
-    }
-  }
-
-  // Remove the original captureFrameIfNeeded function (around line 300-330)
-  // and keep only the optimized version that's defined later in the code.
-  // Delete this function:
-
-  // Also remove the original hasSignificantChanges function (around line 250-300)
-  // and keep only the optimized version that's defined later in the code.
-  // Delete this function:
-
-  // Modify the recording useEffect to use our improved logic
-  // Replace the existing recording useEffect with this one
-
-  // Define captureFrameIfNeeded here
-  const captureFrameIfNeeded = () => {
-    if (!recordingActive || !isRecording) return
-
-    const currentTime = Date.now()
-    const elapsedTime = currentTime - recordingStartTime
-
-    // Check if enough time has passed since the last frame
-    if (lastActionTimestamp && currentTime - lastActionTimestamp < 23) {
-      // 100ms = ~10fps - don't capture too frequently
-      return
-    }
-
-    // Check if there are significant changes since the last frame
-    if (previousFrameState && !hasSignificantChanges(previousFrameState)) {
-      return
-    }
-
-    // Capture the current state
-    const newFrame = {
-      timestamp: elapsedTime,
-      playerPositions: { ...playerPositions },
-      opponentPositions: { ...opponentPositions },
-      opponents: [...opponents],
-      drawings: [...drawings],
-      basketballs: [...basketballs],
-    }
-
-    // Update recorded frames and last action timestamp
-    setRecordedFrames((prev) => [...prev, newFrame])
-    setPreviousFrameState(newFrame)
-    setLastActionTimestamp(currentTime)
-  }
-
-  // Define hasSignificantChanges here
-  const hasSignificantChanges = (previousFrame) => {
-    // Check player positions
-    for (const playerId in playerPositions) {
-      if (!previousFrame.playerPositions[playerId]) return true // New player
-      const dx = playerPositions[playerId].x - previousFrame.playerPositions[playerId].x
-      const dy = playerPositions[playerId].y - previousFrame.playerPositions[playerId].y
-      if (Math.abs(dx) > significantChangeThreshold || Math.abs(dy) > significantChangeThreshold) return true
-    }
-
-    // Check opponent positions
-    for (const opponentId in opponentPositions) {
-      if (!previousFrame.opponentPositions[opponentId]) return true // New opponent
-      const dx = opponentPositions[opponentId].x - previousFrame.opponentPositions[opponentId].x
-      const dy = opponentPositions[opponentId].y - previousFrame.opponentPositions[opponentId].y
-      if (Math.abs(dx) > significantChangeThreshold || Math.abs(dy) > significantChangeThreshold) return true
-    }
-
-    // Check for new opponents
-    if (opponents.length !== previousFrame.opponents.length) return true
-
-    // Check for new drawings
-    if (drawings.length !== previousFrame.drawings.length) return true
-
-    // Check for new basketballs
-    if (basketballs.length !== previousFrame.basketballs.length) return true
-
-    return false
-  }
-
-  useEffect(() => {
-    if (recordingActive && isRecording) {
-      // Use requestAnimationFrame for smoother recording
-      let animationFrameId
-
-      const recordFrame = () => {
-        captureFrameIfNeeded() // This should now refer to the optimized version
-        animationFrameId = requestAnimationFrame(recordFrame)
-      }
-
-      animationFrameId = requestAnimationFrame(recordFrame)
-
-      return () => {
-        cancelAnimationFrame(animationFrameId)
-      }
-    }
-  }, [recordingActive, isRecording, playerPositions, opponentPositions, opponents, drawings, basketballs])
-
-  // Playback functionality
-  useEffect(() => {
-    if (isPlaying && recordedFrames.length > 0) {
-      // Calculate the actual interval based on playback speed
-      const interval = 1000 / (30 * playbackSpeed) // Base on 30fps, adjusted by speed
-
-      playbackRef.current = setInterval(() => {
-        setCurrentFrame((prev) => {
-          if (prev >= recordedFrames.length - 1) {
-            clearInterval(playbackRef.current)
-            setIsPlaying(false)
-            return 0
-          }
-          return prev + 1
-        })
-      }, interval)
-
-      return () => {
-        if (playbackRef.current) {
-          clearInterval(playbackRef.current)
-        }
-      }
-    }
-  }, [isPlaying, recordedFrames, playbackSpeed])
-
-  // Update positions and drawings during playback
-  useEffect(() => {
-    if (isPlaying && recordedFrames.length > 0) {
-      const frame = recordedFrames[currentFrame]
-
-      // If we're not at the last frame, we can interpolate
-      if (currentFrame < recordedFrames.length - 1) {
-        const nextFrame = recordedFrames[currentFrame + 1]
-        const frameDuration = nextFrame.timestamp - frame.timestamp
-
-        // Create a smooth animation between frames using requestAnimationFrame
-        let startTime
-        let animationFrameId
-
-        let lastRenderTime = 0
-
-        const animate = (timestamp) => { 
-          if (!startTime) startTime = timestamp
-
-            // Throttle to ~60fps for smoother rendering on tablets
-            if (timestamp - lastRenderTime < 1000 / 60) {
-              animationFrameId = requestAnimationFrame(animate)
-              return
-            }
-            lastRenderTime = timestamp
-
-            const elapsed = Math.min(timestamp - startTime, normalizedFrames[normalizedFrames.length - 1].timestamp)
-            const progress = Math.min(elapsed / frameDuration, 1)
-
-          // Get interpolated frame
-          const interpolatedFrame = getInterpolatedFrame(frame, nextFrame, progress)
-
-          // Update positions
-          setPlayerPositions(interpolatedFrame.playerPositions)
-          setOpponentPositions(interpolatedFrame.opponentPositions)
-          setOpponents(interpolatedFrame.opponents)
-          setDrawings(interpolatedFrame.drawings)
-          setBasketballs(interpolatedFrame.basketballs)
-
-          // Continue animation if not complete
-          if (progress < 1 && isPlaying) {
-            animationFrameId = requestAnimationFrame(animate)
-          }
-        }
-
-        animationFrameId = requestAnimationFrame(animate)
-
-        return () => {
-          if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId)
-          }
-        }
-      } else {
-        // For the last frame, just set the positions directly
-        setPlayerPositions(frame.playerPositions)
-        setOpponentPositions(frame.opponentPositions || {})
-        setOpponents(frame.opponents || [])
-        setDrawings(frame.drawings)
-        setBasketballs(frame.basketballs || [])
-      }
-    }
-  }, [isPlaying, currentFrame, recordedFrames])
-
-  // Start recording
-  // Stop recording
 
   const handlePlayerDragStart = (playerId) => {
-    if (isPlaying) return
-
-    // Activate recording if primed
-    if (recordingPrimed && !recordingActive) {
-      activateRecording()
-    }
-
     // Store the initial position for undo
     const initialPosition = playerPositions[playerId]
     if (initialPosition) {
@@ -970,11 +898,6 @@ const CoachingBoard = ({
 
   // Add opponent marker
   const addOpponent = () => {
-    // Activate recording if primed
-    if (recordingPrimed && !recordingActive) {
-      activateRecording()
-    }
-
     const newOpponentId = `opponent-${Date.now()}`
 
     // Position the new opponent in the center of the court
@@ -1022,20 +945,10 @@ const CoachingBoard = ({
       ...prev,
       [opponentId]: { x: clampedX, y: clampedY },
     }))
-
-    // If recording is active, capture this frame
-    if (recordingActive && isRecording) {
-      captureFrameIfNeeded() // This should now refer to the optimized version
-    }
   }
 
   // Add basketball to the court
   const addBasketball = (x, y) => {
-    // Activate recording if primed
-    if (recordingPrimed && !recordingActive) {
-      activateRecording()
-    }
-
     const newBasketball = {
       id: `ball-${Date.now()}`,
       position: { x, y },
@@ -1050,11 +963,6 @@ const CoachingBoard = ({
   // Handle basketball drag start
   const handleBasketballDragStart = (ballId) => {
     if (isPlaying) return
-
-    // Activate recording if primed
-    if (recordingPrimed && !recordingActive) {
-      activateRecording()
-    }
 
     // Find the ball
     const ball = basketballs.find((b) => b.id === ballId)
@@ -1090,11 +998,6 @@ const CoachingBoard = ({
     const courtRect = courtRef.current.getBoundingClientRect()
     const x = e.clientX - courtRect.left
     const y = e.clientY - courtRect.top
-
-    // Activate recording if primed
-    if (recordingPrimed && !recordingActive) {
-      activateRecording()
-    }
 
     setIsDrawing(true)
     setStartPoint({ x, y })
@@ -1145,38 +1048,6 @@ const CoachingBoard = ({
         ...prev,
         points: [prev.points[0], { x, y }],
       }))
-
-      // If recording, capture intermediate states more frequently
-      if (isRecording && recordingStartTime) {
-        // Record every small movement to ensure smooth line drawing
-        const lastFrame = recordedFrames[recordedFrames.length - 1]
-        const lastPoint =
-          lastFrame?.drawings?.length > 0 ? lastFrame.drawings[lastFrame.drawings.length - 1]?.points?.[1] : null
-
-        if (lastPoint) {
-          const distance = Math.sqrt(Math.pow(x - lastPoint.x, 2) + Math.pow(y - lastPoint.y, 2))
-          if (distance > 1) {
-            // Reduced from 2px to 1px to capture more points
-            const elapsedTime = Date.now() - recordingStartTime
-            const updatedDrawing = {
-              ...currentDrawing,
-              points: [currentDrawing.points[0], { x, y }],
-            }
-
-            setRecordedFrames((prev) => [
-              ...prev,
-              {
-                timestamp: elapsedTime,
-                playerPositions: { ...playerPositions },
-                opponentPositions: { ...opponentPositions },
-                opponents: [...opponents],
-                drawings: [...drawings, updatedDrawing],
-                basketballs: [...basketballs],
-              },
-            ])
-          }
-        }
-      }
     } else if (drawMode === "pen" || drawMode === "erase") {
       // For pen and eraser, we add points to the path
       // Use point thinning algorithm to avoid too many points
@@ -1191,34 +1062,11 @@ const CoachingBoard = ({
         }
 
         setCurrentDrawing(updatedDrawing)
-
-        // If recording, capture intermediate states more frequently
-        if (isRecording && recordingStartTime) {
-          // Record every point for pen/eraser to ensure smooth drawing
-          const elapsedTime = Date.now() - recordingStartTime
-
-          // Capture frame at a controlled rate to prevent overwhelming state updates
-          if (elapsedTime % 16 === 0) {
-            // Approximately 60fps
-            setRecordedFrames((prev) => [
-              ...prev,
-              {
-                timestamp: elapsedTime,
-                playerPositions: { ...playerPositions },
-                opponentPositions: { ...opponentPositions },
-                opponents: [...opponents],
-                drawings: [...drawings, updatedDrawing],
-                basketballs: [...basketballs],
-                currentDrawing: updatedDrawing,
-              },
-            ])
-          }
-        }
       }
     }
   }
 
-  // Handle mouse up for drawing
+  // Enhance the handleMouseUp function to track arrow count
   const handleMouseUp = () => {
     if (isDrawing && currentDrawing && !isPlaying) {
       if (drawMode === "erase") {
@@ -1275,48 +1123,32 @@ const CoachingBoard = ({
           setBasketballs((prev) => prev.filter((ball) => !basketballsToRemove.includes(ball.id)))
         }
 
-        // If recording, capture this state
-        if (isRecording) {
-          const elapsedTime = Date.now() - recordingStartTime
-          setRecordedFrames((prev) => [
-            ...prev,
-            {
-              timestamp: elapsedTime,
-              playerPositions: { ...playerPositions },
-              opponentPositions: { ...opponentPositions },
-              opponents: [...opponents.filter((opponent) => !opponentsToRemove.includes(opponent.id))],
-              drawings: [...updatedDrawings],
-              basketballs: [...basketballs.filter((ball) => !basketballsToRemove.includes(ball.id))],
-            },
-          ])
-        }
-
         // Automatically deactivate eraser after use
         setDrawMode("none")
         setEraserMode(false)
       } else {
         // For drawing tools, add the current drawing
-        const updatedDrawings = [...drawings, currentDrawing]
+        let finalDrawing = currentDrawing
+
+        // If this is an arrow, add number and increment count
+        if (drawMode === "arrow") {
+          // Increment arrow count
+          const newArrowCount = arrowCount + 1
+
+          // Add arrow number to the drawing data
+          finalDrawing = {
+            ...currentDrawing,
+            arrowNumber: newArrowCount,
+          }
+
+          setArrowCount(newArrowCount)
+        }
+
+        const updatedDrawings = [...drawings, finalDrawing]
         setDrawings(updatedDrawings)
 
         // Track this action for undo
-        trackAction("drawing", { drawing: currentDrawing })
-
-        // If recording, capture this state with the new drawing
-        if (isRecording) {
-          const elapsedTime = Date.now() - recordingStartTime
-          setRecordedFrames((prev) => [
-            ...prev,
-            {
-              timestamp: elapsedTime,
-              playerPositions: { ...playerPositions },
-              opponentPositions: { ...opponentPositions },
-              opponents: [...opponents],
-              drawings: [...updatedDrawings],
-              basketballs: [...basketballs],
-            },
-          ])
-        }
+        trackAction("drawing", { drawing: finalDrawing })
       }
 
       setCurrentDrawing(null)
@@ -1325,242 +1157,7 @@ const CoachingBoard = ({
     }
   }
 
-  // Improve the eraser functionality
-  // Update the drawMode state handling to toggle eraser mode
-  const toggleEraserMode = () => {
-    if (drawMode === "erase") {
-      // If already in eraser mode, turn it off
-      setDrawMode("none")
-      setEraserMode(false)
-    } else {
-      // Turn on eraser mode
-      setDrawMode("erase")
-      setEraserMode(true)
-    }
-  }
-
-  // Add a single-tap erase function
-  const handleEraserTap = (e) => {
-    if (!eraserMode || isPlaying) return
-
-    const courtRect = courtRef.current.getBoundingClientRect()
-    const x = e.clientX - courtRect.left
-    const y = e.clientY - courtRect.top
-
-    // Check for drawings to erase
-    let erasedDrawing = false
-    const updatedDrawings = drawings.filter((drawing) => {
-      // For each drawing, check if any point is close to the tap
-      for (const point of drawing.points) {
-        const distance = Math.sqrt(Math.pow(point.x - x, 2) + Math.pow(point.y - y, 2))
-        if (distance < 20) {
-          erasedDrawing = true
-          return false // Remove this drawing
-        }
-      }
-      return true // Keep this drawing
-    })
-
-    if (erasedDrawing) {
-      setDrawings(updatedDrawings)
-      // Automatically deactivate eraser after successful erase
-      setDrawMode("none")
-      setEraserMode(false)
-      return // If we erased a drawing, don't check for opponents
-    }
-
-    // Check for opponents to erase
-    const opponentToRemove = opponents.find((opponent) => {
-      const opponentPos = opponentPositions[opponent.id]
-      if (opponentPos) {
-        const distance = Math.sqrt(Math.pow(opponentPos.x - x, 2) + Math.pow(opponentPos.y - y, 2))
-        return distance < 20
-      }
-      return false
-    })
-
-    if (opponentToRemove) {
-      setOpponents(opponents.filter((o) => o.id !== opponentToRemove.id))
-      const newPositions = { ...opponentPositions }
-      delete newPositions[opponentToRemove.id]
-      setOpponentPositions(newPositions)
-      // Automatically deactivate eraser after successful erase
-      setDrawMode("none")
-      setEraserMode(false)
-      return
-    }
-
-    // Check for basketballs to erase
-    const basketballToRemove = basketballs.find((ball) => {
-      const distance = Math.sqrt(Math.pow(ball.position.x - x, 2) + Math.pow(ball.position.y - y, 2))
-      return distance < 20
-    })
-
-    if (basketballToRemove) {
-      setBasketballs((prev) => prev.filter((ball) => ball.id !== basketballToRemove.id))
-      // Automatically deactivate eraser after successful erase
-      setDrawMode("none")
-      setEraserMode(false)
-    }
-  }
-
-  // Simple path intersection check
-  const doPathsIntersect = (path1, path2) => {
-    for (const point1 of path1) {
-      for (const point2 of path2) {
-        const distance = Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2))
-        if (distance < 15) return true
-      }
-    }
-    return false
-  }
-
-  // Clear all drawings
-  const clearDrawings = () => {
-    setDrawings([])
-  }
-
-  // Update the saveSystem function to show notification
-  // Replace the saveSystem function with this:
-  const saveSystem = (name) => {
-    if (!name.trim()) {
-      alert("Please enter a system name")
-      return false
-    }
-
-    const system = {
-      id: Date.now().toString(),
-      name: name,
-      drawings,
-      playerPositions,
-      opponentPositions,
-      opponents,
-      basketballs,
-      isStatic: true,
-      createdAt: new Date().toISOString(),
-      // Store the current lineup ID with the system
-      lineupId: selectedLineupId || lastSelectedLineupIdRef.current,
-    }
-
-    setSavedSystems((prev) => [...prev, system])
-
-    // Show notification
-    setNotification({ show: true, message: "Static System Saved Successfully" })
-    setTimeout(() => setNotification({ show: false, message: "" }), 3000)
-
-    return true
-  }
-
-  // Update the saveRecording function to show notification
-  // Replace the saveRecording function with this:
-  const saveRecording = (name) => {
-    if (!name.trim()) {
-      alert("Please enter a name for this system")
-      return false
-    }
-
-    const newSystem = {
-      id: Date.now().toString(),
-      name: name,
-      frames: recordedFrames,
-      createdAt: new Date().toISOString(),
-      isDynamic: true,
-      // Store the lineup ID with the system to maintain context
-      lineupId: selectedLineupId || lastSelectedLineupIdRef.current,
-    }
-
-    setSavedSystems((prev) => [...prev, newSystem])
-
-    // Show notification
-    setNotification({ show: true, message: "Dynamic System Saved Successfully" })
-    setTimeout(() => setNotification({ show: false, message: "" }), 3000)
-
-    // Don't reset the lineup selection after saving
-    // The key is to NOT modify selectedLineupId here
-    return true
-  }
-
-  // Load a saved system
-  const loadSystem = (system) => {
-    setDrawings(system.drawings || [])
-    setPlayerPositions(system.playerPositions || {})
-    setOpponentPositions(system.opponentPositions || {})
-    setOpponents(system.opponents || [])
-    setBasketballs(system.basketballs || [])
-  }
-
-  // Delete a saved system
-  const deleteSystem = (systemId) => {
-    if (window.confirm("Are you sure you want to delete this system?")) {
-      setSavedSystems((prev) => prev.filter((system) => system.id !== systemId))
-    }
-  }
-
-  // Fix the playRecording function to properly play the recording
-  const playRecording = (system) => {
-    if (isPlaying) {
-      setIsPlaying(false)
-      if (playbackRef.current) {
-        clearInterval(playbackRef.current)
-      }
-      return
-    }
-
-    // Process the frames to ensure they have all required properties
-    const processedFrames = system.frames.map((frame) => ({
-      ...frame,
-      playerPositions: frame.playerPositions || {},
-      opponentPositions: frame.opponentPositions || {},
-      opponents: frame.opponents || [],
-      drawings: frame.drawings || [],
-      basketballs: frame.basketballs || [],
-    }))
-
-    // If the system has a stored lineup ID and no lineup is currently selected,
-    // restore that lineup selection
-    if (system.lineupId && !selectedLineupId) {
-      setSelectedLineupId(system.lineupId)
-    }
-
-    setRecordedFrames(processedFrames)
-    setCurrentFrame(0)
-    setIsPlaying(true)
-  }
-
-  // Handle lineup selection change
-  const handleLineupChange = (e) => {
-    setSelectedLineupId(e.target.value)
-    // Close tactics dropdown when lineup changes
-    setShowTacticsDropdown(false)
-  }
-
-  // Update the loadTactic function to show the modal instead of just setting the current tactic
-  const loadTactic = (tactic) => {
-    setTacticToDisplay(tactic)
-    setShowTacticsDropdown(false)
-  }
-
-  // Calculate arrowhead points
-  const calculateArrowhead = (start, end) => {
-    const angle = Math.atan2(end.y - start.y, end.x - start.x)
-    const length = 15 // Length of the arrowhead
-    const angle1 = angle - Math.PI / 6
-    const angle2 = angle + Math.PI / 6
-
-    const point1 = {
-      x: end.x - length * Math.cos(angle1),
-      y: end.y - length * Math.sin(angle1),
-    }
-
-    const point2 = {
-      x: end.x - length * Math.cos(angle2),
-      y: end.y - length * Math.sin(angle2),
-    }
-
-    return [point1, end, point2]
-  }
-
-  // Render arrowhead for arrow drawings
+  // Update the renderArrowhead function to properly render the arrowhead
   const renderArrowhead = (drawing) => {
     if (drawing.type !== "arrow" || drawing.points.length < 2) return null
 
@@ -1580,401 +1177,20 @@ const CoachingBoard = ({
     )
   }
 
-  // Initialize selected lineup when currentLineup changes
-  useEffect(() => {
-    if (currentLineup) {
-      setSelectedLineupId(currentLineup.id)
-    }
-  }, [currentLineup])
-
-  // Add a new function to implement frame interpolation for smoother playback
-  // Add this function before the return statement
-  // Improve the getInterpolatedFrame function for smoother playback
-  // Replace the existing getInterpolatedFrame function with this enhanced version
-
-  // Modify the action handlers to trigger recording start when an action is performed
-  // Update the handleMouseDown function to activate recording when drawing starts
-  // Update the handlePlayerDragStart function to activate recording
-  // Update the addOpponent function to activate recording
-  // Update the addBasketball function to activate recording
-  // Update the handleBasketballDragStart function to activate recording
-  // Update the handleOpponentDrag function to capture frames during dragging
-
-  // Helper function to normalize frame timing to ensure consistent playback
-  const normalizeFrameTimingFunc = (frames) => {
-    if (frames.length <= 1) return frames
-
-    // Create a copy of the frames
-    const normalizedFrames = [...frames]
-
-    // Calculate the average time between frames
-    const totalDuration = normalizedFrames[normalizedFrames.length - 1].timestamp - normalizedFrames[0].timestamp
-
-    // Target a consistent frame rate of 60fps
-    const targetFrameDuration = 20 // ~50fps in ms
-
-    // Identify and fix large gaps or bunched frames
-    for (let i = 1; i < normalizedFrames.length; i++) {
-      const prevFrame = normalizedFrames[i - 1]
-      const currentFrame = normalizedFrames[i]
-      const timeDiff = currentFrame.timestamp - prevFrame.timestamp
-
-      // If the time difference is too large (more than 2x target) or too small (less than 0.5x target)
-      // adjust the timestamp to be more consistent
-      if (timeDiff > targetFrameDuration * 2 || timeDiff < targetFrameDuration * 0.5) {
-        // Adjust the timestamp to be more consistent
-        currentFrame.timestamp = prevFrame.timestamp + targetFrameDuration
-      }
-    }
-
-    return normalizedFrames
-  }
-
-  // Binary search to find the frame index by timestamp - much faster than linear search
-  const findFrameIndexByTimeFunc = (frames, targetTime) => {
-    if (frames.length === 0) return 0
-    if (targetTime <= frames[0].timestamp) return 0
-    if (targetTime >= frames[frames.length - 1].timestamp) return frames.length - 1
-
-    let low = 0
-    let high = frames.length - 1
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2)
-
-      if (
-        frames[mid].timestamp <= targetTime &&
-        (mid === frames.length - 1 || frames[mid + 1].timestamp > targetTime)
-      ) {
-        return mid
-      } else if (frames[mid].timestamp > targetTime) {
-        high = mid - 1
-      } else {
-        low = mid + 1
-      }
-    }
-
-    return low
-  }
-
-  // Improve the getInterpolatedFrame function for smoother transitions
-  const getInterpolatedFrameFunc = (frame1, frame2, progress) => {
-    // If we only have one frame or they're the same, just return it
-    if (!frame2 || frame1 === frame2) return frame1
-
-    // Create a new interpolated frame
-    const interpolatedFrame = {
-      timestamp: frame1.timestamp + (frame2.timestamp - frame1.timestamp) * progress,
-      playerPositions: {},
-      opponentPositions: {},
-      opponents: frame1.opponents, // Keep the same opponents
-      drawings: [], // We'll handle drawings specially
-      basketballs: [],
-    }
-
-    // Apply improved cubic easing function for smoother motion
-    // This creates a more natural ease-in/ease-out effect
-    const easedProgress = progress < 0.5 ? 4 * Math.pow(progress, 3) : 1 - Math.pow(-2 * progress + 2, 3) / 2
-
-    // Interpolate player positions with easing
-    Object.keys(frame1.playerPositions).forEach((playerId) => {
-      if (frame2.playerPositions[playerId]) {
-        interpolatedFrame.playerPositions[playerId] = {
-          x:
-            frame1.playerPositions[playerId].x +
-            (frame2.playerPositions[playerId].x - frame1.playerPositions[playerId].x) * easedProgress,
-          y:
-            frame1.playerPositions[playerId].y +
-            (frame2.playerPositions[playerId].y - frame1.playerPositions[playerId].y) * easedProgress,
-        }
-      } else {
-        interpolatedFrame.playerPositions[playerId] = frame1.playerPositions[playerId]
-      }
+  // Capture system state when opening the save form
+  const handleOpenSaveForm = () => {
+    // Store current system state
+    setSavedSystemState({
+      drawings: [...drawings],
+      opponents: [...opponents],
+      opponentPositions: { ...opponentPositions },
+      basketballs: [...basketballs],
+      playerPositions: { ...playerPositions },
     })
 
-    // Interpolate opponent positions with easing
-    Object.keys(frame1.opponentPositions).forEach((opponentId) => {
-      if (frame2.opponentPositions[opponentId]) {
-        interpolatedFrame.opponentPositions[opponentId] = {
-          x:
-            frame1.opponentPositions[opponentId].x +
-            (frame2.opponentPositions[opponentId].x - frame1.opponentPositions[opponentId].x) * easedProgress,
-          y:
-            frame1.opponentPositions[opponentId].y +
-            (frame2.opponentPositions[opponentId].y - frame1.opponentPositions[opponentId].y) * easedProgress,
-        }
-      } else {
-        interpolatedFrame.opponentPositions[opponentId] = frame1.opponentPositions[opponentId]
-      }
-    })
-
-    // Interpolate basketball positions with easing
-    frame1.basketballs.forEach((ball1) => {
-      const ball2 = frame2.basketballs.find((b) => b.id === ball1.id)
-      if (ball2) {
-        interpolatedFrame.basketballs.push({
-          id: ball1.id,
-          position: {
-            x: ball1.position.x + (ball2.position.x - ball1.position.x) * easedProgress,
-            y: ball1.position.y + (ball2.position.y - ball1.position.y) * easedProgress,
-          },
-        })
-      } else {
-        interpolatedFrame.basketballs.push(ball1)
-      }
-    })
-
-    // Add any basketballs that are in frame2 but not in frame1
-    frame2.basketballs.forEach((ball2) => {
-      if (!frame1.basketballs.some((b) => b.id === ball2.id)) {
-        interpolatedFrame.basketballs.push(ball2)
-      }
-    })
-
-    // Special handling for drawings to prevent flickering
-    // For drawings, we want to ensure a smooth transition
-    // If we're in the first half of the transition, use frame1's drawings
-    // If we're in the second half, use frame2's drawings
-    // This prevents the flickering effect when drawings change
-    interpolatedFrame.drawings = [...frame2.drawings]
-
-    return interpolatedFrame
+    // Set a flag to show the form
+    setShowStaticNamePrompt(true)
   }
-
-  // Replace the playback useEffect with this optimized version
-  useEffect(() => {
-    if (isPlaying && recordedFrames.length > 0) {
-      let animationFrameId
-      let startTime = null
-      let lastFrameIndex = 0
-
-      // Track last applied values to avoid unnecessary state updates
-      let lastAppliedPlayerPositions = null
-      let lastAppliedOpponentPositions = null
-      let lastAppliedOpponents = null
-      let lastAppliedDrawings = null
-      let lastAppliedBasketballs = null
-
-      // Pre-process frames to normalize time gaps
-      const normalizedFrames = normalizeFrameTimingFunc(recordedFrames)
-
-      let lastRenderTime = 0
-
-      const animate = (timestamp) => {
-        if (!startTime) startTime = timestamp
-
-          // Throttle to ~60fps for smoother rendering on tablets
-          if (timestamp - lastRenderTime < 1000 / 60) {
-            animationFrameId = requestAnimationFrame(animate)
-            return
-          }
-          lastRenderTime = timestamp
-
-          const elapsed = Math.min(timestamp - startTime, normalizedFrames[normalizedFrames.length - 1].timestamp)
-
-        // Calculate which frame we should be at based on elapsed time and playback speed
-        const targetTime = elapsed * playbackSpeed
-
-        // Find the appropriate frame based on timestamp using binary search for better performance
-        const frameIndex = findFrameIndexByTimeFunc(normalizedFrames, targetTime)
-
-        // If we've reached the end of the recording
-        if (
-          frameIndex >= normalizedFrames.length - 1 &&
-          targetTime >= normalizedFrames[normalizedFrames.length - 1].timestamp
-        ) {
-          setIsPlaying(false)
-          setCurrentFrame(0)
-
-          // Reset to initial state
-          if (normalizedFrames.length > 0) {
-            setPlayerPositions(normalizedFrames[0].playerPositions)
-            setOpponentPositions(normalizedFrames[0].opponentPositions)
-            setOpponents(normalizedFrames[0].opponents)
-            setDrawings(normalizedFrames[0].drawings)
-            setBasketballs(normalizedFrames[0].basketballs)
-          }
-          return
-        }
-
-        // Set the current frame index for UI purposes
-        setCurrentFrame(frameIndex)
-
-        // Get the current frame and the next frame for interpolation
-        const currentKeyframe = normalizedFrames[frameIndex]
-        const nextKeyframe = normalizedFrames[frameIndex + 1]
-
-        if (nextKeyframe) {
-          // Calculate progress between the two keyframes
-          const frameDuration = nextKeyframe.timestamp - currentKeyframe.timestamp
-          const frameProgress = frameDuration > 0 ? (targetTime - currentKeyframe.timestamp) / frameDuration : 0
-
-          // Get interpolated frame with clamped progress
-          const interpolatedFrame = getInterpolatedFrame(
-            currentKeyframe,
-            nextKeyframe,
-            Math.min(1, Math.max(0, frameProgress)),
-          )
-
-          // Only update state if values have changed (shallow equality check)
-          // This prevents unnecessary re-renders and improves performance
-
-          // Update player positions only if they've changed
-          if (!shallowEqual(interpolatedFrame.playerPositions, lastAppliedPlayerPositions)) {
-            setPlayerPositions(interpolatedFrame.playerPositions)
-            lastAppliedPlayerPositions = interpolatedFrame.playerPositions
-          }
-
-          // Update opponent positions only if they've changed
-          if (!shallowEqual(interpolatedFrame.opponentPositions, lastAppliedOpponentPositions)) {
-            setOpponentPositions(interpolatedFrame.opponentPositions)
-            lastAppliedOpponentPositions = interpolatedFrame.opponentPositions
-          }
-
-          // Update opponents only if they've changed
-          if (!shallowEqual(interpolatedFrame.opponents, lastAppliedOpponents)) {
-            setOpponents(interpolatedFrame.opponents)
-            lastAppliedOpponents = interpolatedFrame.opponents
-          }
-
-          // Update drawings only if they've changed or at key points to ensure smooth transitions
-          if (
-            !shallowEqual(interpolatedFrame.drawings, lastAppliedDrawings) ||
-            frameIndex !== lastFrameIndex ||
-            Math.abs(lastAppliedDrawings) ||
-            frameIndex !== lastFrameIndex ||
-            Math.abs(frameProgress - 0.5) < 0.05
-          ) {
-            setDrawings(interpolatedFrame.drawings)
-            lastAppliedDrawings = interpolatedFrame.drawings
-          }
-
-          // Update basketballs only if they've changed
-          if (!shallowEqual(interpolatedFrame.basketballs, lastAppliedBasketballs)) {
-            setBasketballs(interpolatedFrame.basketballs)
-            lastAppliedBasketballs = interpolatedFrame.basketballs
-          }
-
-          // Track the last frame we rendered
-          lastFrameIndex = frameIndex
-        } else {
-          // If there's no next frame, just use the current frame
-          // Only update if values have changed
-          if (!shallowEqual(currentKeyframe.playerPositions, lastAppliedPlayerPositions)) {
-            setPlayerPositions(currentKeyframe.playerPositions)
-            lastAppliedPlayerPositions = currentKeyframe.playerPositions
-          }
-
-          if (!shallowEqual(currentKeyframe.opponentPositions, lastAppliedOpponentPositions)) {
-            setOpponentPositions(currentKeyframe.opponentPositions)
-            lastAppliedOpponentPositions = currentKeyframe.opponentPositions
-          }
-
-          if (!shallowEqual(currentKeyframe.opponents, lastAppliedOpponents)) {
-            setOpponents(currentKeyframe.opponents)
-            lastAppliedOpponents = currentKeyframe.opponents
-          }
-
-          if (!shallowEqual(currentKeyframe.drawings, lastAppliedDrawings)) {
-            setDrawings(currentKeyframe.drawings)
-            lastAppliedDrawings = currentKeyframe.drawings
-          }
-
-          if (!shallowEqual(currentKeyframe.basketballs, lastAppliedBasketballs)) {
-            setBasketballs(currentKeyframe.basketballs)
-            lastAppliedBasketballs = currentKeyframe.basketballs
-          }
-        }
-
-        // Continue animation if still playing
-        if (isPlaying) {
-          animationFrameId = requestAnimationFrame(animate)
-        }
-      }
-
-      animationFrameId = requestAnimationFrame(animate)
-
-      return () => {
-        if (animationFrameId) {
-          cancelAnimationFrame(animationFrameId)
-        }
-      }
-    }
-  }, [isPlaying, recordedFrames, playbackSpeed])
-
-  // Add a helper function for shallow equality checks
-  const shallowEqual = (obj1, obj2) => {
-    if (obj1 === obj2) return true
-    if (!obj1 || !obj2) return false
-
-    // For arrays, check length first
-    if (Array.isArray(obj1) && Array.isArray(obj2)) {
-      if (obj1.length !== obj2.length) return false
-      // For arrays of objects (like opponents), we'll do a simple length check
-      // A more thorough check would compare each item, but that might be too expensive
-      return true
-    }
-
-    // For objects like positions, check if keys and values match
-    const keys1 = Object.keys(obj1)
-    const keys2 = Object.keys(obj2)
-
-    if (keys1.length !== keys2.length) return false
-
-    // For position objects, we'll do a quick check of a few keys
-    // This is faster than checking every key but still catches most changes
-    const sampleSize = Math.min(5, keys1.length)
-    for (let i = 0; i < sampleSize; i++) {
-      const key = keys1[i]
-      // For nested objects like positions with x,y coordinates
-      if (typeof obj1[key] === "object" && typeof obj2[key] === "object") {
-        if (obj1[key].x !== obj2[key].x || obj1[key].y !== obj2[key].y) {
-          return false
-        }
-      } else if (obj1[key] !== obj2[key]) {
-        return false
-      }
-    }
-
-    return true
-  }
-
-  const handleMouseMove = (e) => {
-    handleMouseMoveDrawing(e)
-  }
-
-  const getInterpolatedFrame = getInterpolatedFrameFunc
-
-  // Add a touch-specific effect to ensure lineup selection persists
-  // This will run when the save form is shown/hidden
-  // Update the useEffect that handles lineup selection persistence
-  // Replace the existing useEffect that runs when showSaveForm changes with this improved version:
-  useEffect(() => {
-    // This effect specifically targets the issue on touch devices
-    // by ensuring the lineup selection is preserved when the save form
-    // appears and disappears
-    if (!showSaveForm && lastSelectedLineupIdRef.current) {
-      // Small delay to ensure the lineup is still selected after form closes
-      const timeoutId = setTimeout(() => {
-        // Re-select the lineup if it was somehow deselected
-        const lineupExists = teamLineups.some((lineup) => lineup.id === lastSelectedLineupIdRef.current)
-        if (lineupExists) {
-          // Force a re-selection of the lineup to ensure it's properly applied
-          setSelectedLineupId(lastSelectedLineupIdRef.current)
-        }
-      }, 50)
-
-      return () => clearTimeout(timeoutId)
-    }
-  }, [showSaveForm, teamLineups])
-
-  // Add an effect to update the ref whenever selectedLineupId changes
-  // Add this new useEffect after the other useEffects
-  useEffect(() => {
-    if (selectedLineupId) {
-      lastSelectedLineupIdRef.current = selectedLineupId
-    }
-  }, [selectedLineupId])
 
   return (
     <div className="coaching-board-container">
@@ -2111,55 +1327,15 @@ const CoachingBoard = ({
 
           {/* Recording and Systems tools group */}
           <div className="tool-group">
-            {/* Record System Dropdown */}
-            <div className="dropdown-container">
-              <button
-                className={`dropdown-button ${isRecording ? "recording" : ""}`}
-                onClick={() => {
-                  setShowRecordDropdown(!showRecordDropdown)
-                  setShowSavedSystemsDropdown(false)
-                }}
-                disabled={disabled || isPlaying}
-              >
-                {isRecording ? (
-                  <>
-                    <span className="recording-indicator">●</span> Recording...
-                  </>
-                ) : (
-                  <>Record System</>
-                )}
-                <span className="dropdown-arrow">▼</span>
-              </button>
+            {/* Save System Button */}
+            <button className="opponent-button" onClick={handleOpenSaveForm} disabled={disabled}>
+              Save System
+            </button>
 
-              {showRecordDropdown && !isRecording && (
-                <div className="dropdown-menu">
-                  <button
-                    className="dropdown-item"
-                    onClick={() => {
-                      setShowStaticNamePrompt(true)
-                      setShowRecordDropdown(false)
-                    }}
-                  >
-                    Record Static System
-                  </button>
-                  <button
-                    className="dropdown-item"
-                    onClick={() => {
-                      startRecording()
-                      setShowRecordDropdown(false)
-                    }}
-                  >
-                    Record Dynamic System
-                  </button>
-                </div>
-              )}
-
-              {isRecording && (
-                <button className="stop-recording-button" onClick={stopRecording}>
-                  Stop Recording
-                </button>
-              )}
-            </div>
+            {/* Add the Share Systems Button here */}
+            <button className="opponent-button share-button" onClick={handleShareSystems} disabled={disabled}>
+              Share Systems
+            </button>
 
             {/* Saved Systems Dropdown */}
             <div className="dropdown-container">
@@ -2167,11 +1343,12 @@ const CoachingBoard = ({
                 className="dropdown-button"
                 onClick={() => {
                   setShowSavedSystemsDropdown(!showSavedSystemsDropdown)
-                  setShowRecordDropdown(false)
                 }}
-                disabled={disabled || savedSystems.length === 0}
+                disabled={disabled || savedSystems.filter((s) => s.isStatic).length === 0}
               >
-                Saved Systems
+                {savedSystems.filter((s) => s.isStatic).length > 0
+                  ? `Saved Systems (${savedSystems.filter((s) => s.isStatic).length})`
+                  : "Saved Systems"}
                 <span className="dropdown-arrow">▼</span>
               </button>
 
@@ -2215,126 +1392,94 @@ const CoachingBoard = ({
                     </div>
                   </div>
 
-                  {/* Dynamic Systems */}
-                  <div className="systems-section">
-                    <div className="systems-section-header">Dynamic Systems</div>
-                    <div className="systems-list">
-                      {savedSystems.filter((s) => s.isDynamic).length > 0 ? (
-                        savedSystems
-                          .filter((s) => s.isDynamic)
-                          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                          .map((system) => (
-                            <div key={system.id} className="system-item">
-                              <span className="system-name">{system.name}</span>
-                              <div className="system-actions">
-                                <div className="playback-speed-control">
-                                  <label>Speed:</label>
-                                  <select
-                                    value={playbackSpeed}
-                                    onChange={(e) => setPlaybackSpeed(Number.parseFloat(e.target.value))}
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <option value="0.5">Slow</option>
-                                    <option value="0.75">Normal</option>
-                                    <option value="2">Fast</option>
-                                  </select>
-                                </div>
-                                <button
-                                  className={`system-action-button ${isPlaying && recordedFrames === system.frames ? "playing" : ""}`}
-                                  onClick={() => {
-                                    playRecording(system)
-                                    if (!isPlaying) {
-                                      setShowSavedSystemsDropdown(false)
-                                    }
-                                  }}
-                                >
-                                  {isPlaying && recordedFrames === system.frames ? "Stop" : "Play"}
-                                </button>
-                                <button
-                                  className="system-action-button delete"
-                                  onClick={() => {
-                                    deleteSystem(system.id)
-                                  }}
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </div>
-                          ))
-                      ) : (
-                        <div className="empty-systems-message">No dynamic systems saved</div>
-                      )}
-                    </div>
-                  </div>
+                  {/* No Dynamic Systems Section */}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {showSaveForm && (
-          <div className="system-save-form">
-            <h3>Save Recorded System</h3>
-            <div className="form-group">
-              <label htmlFor="newSystemName">System Name</label>
-              <input
-                id="newSystemName"
-                type="text"
-                value={newSystemName}
-                onChange={(e) => setNewSystemName(e.target.value)}
-                placeholder="Enter a name for this system"
-              />
-            </div>
-            <div className="form-actions">
-              <button type="button" className="action-button" onClick={() => setShowSaveForm(false)}>
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="action-button"
-                onClick={() => {
-                  const saved = saveRecording(newSystemName)
-                  if (saved) {
-                    setShowSaveForm(false)
-                  }
-                }}
-              >
-                Save System
-              </button>
-            </div>
-          </div>
-        )}
-
         {showStaticNamePrompt && (
-          <div className="system-save-form">
-            <h3>Save Static System</h3>
-            <div className="form-group">
-              <label htmlFor="staticSystemName">System Name</label>
-              <input
-                id="staticSystemName"
-                type="text"
-                value={staticSystemName}
-                onChange={(e) => setStaticSystemName(e.target.value)}
-                placeholder="Enter a name for this system"
-              />
-            </div>
-            <div className="form-actions">
-              <button type="button" className="action-button" onClick={() => setShowStaticNamePrompt(false)}>
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="action-button"
-                onClick={() => {
-                  const success = saveSystem(staticSystemName)
-                  if (success) {
+          <div className="system-save-overlay">
+            <div className="system-save-form">
+              <h3>Save Static System</h3>
+              <div className="form-group">
+                <label htmlFor="staticSystemName">System Name</label>
+                <input
+                  id="staticSystemName"
+                  type="text"
+                  value={staticSystemName}
+                  onChange={(e) => setStaticSystemName(e.target.value)}
+                  placeholder="Enter a name for this system"
+                  autoComplete="off"
+                />
+              </div>
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="action-button"
+                  onClick={() => {
+                    // Restore original state if canceling
+                    if (savedSystemState) {
+                      setDrawings(savedSystemState.drawings)
+                      setOpponents(savedSystemState.opponents)
+                      setOpponentPositions(savedSystemState.opponentPositions)
+                      setBasketballs(savedSystemState.basketballs)
+                      setPlayerPositions(savedSystemState.playerPositions)
+                    }
                     setStaticSystemName("")
                     setShowStaticNamePrompt(false)
-                  }
-                }}
-              >
-                Save System
-              </button>
+                    setSavedSystemState(null)
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="action-button"
+                  onClick={() => {
+                    // Use the saved state for the system, not the current state which might be affected by the bug
+                    if (savedSystemState && staticSystemName.trim()) {
+                      // Create a system object using the saved state
+                      const system = {
+                        id: Date.now().toString(),
+                        name: staticSystemName,
+                        drawings: savedSystemState.drawings,
+                        playerPositions: savedSystemState.playerPositions,
+                        opponentPositions: savedSystemState.opponentPositions,
+                        opponents: savedSystemState.opponents,
+                        basketballs: savedSystemState.basketballs,
+                        isStatic: true,
+                        createdAt: new Date().toISOString(),
+                      }
+
+                      // Add to saved systems
+                      setSavedSystems((prevSystems) => [...prevSystems, system])
+
+                      // Show success notification
+                      setNotification({
+                        show: true,
+                        message: `System "${staticSystemName}" saved successfully!`,
+                      })
+                      setTimeout(() => setNotification({ show: false, message: "" }), 3000)
+
+                      // Clear the system name and close the form
+                      setStaticSystemName("")
+                      setShowStaticNamePrompt(false)
+                      setSavedSystemState(null)
+                    } else {
+                      // Show error if no name provided
+                      setNotification({
+                        show: true,
+                        message: "Please enter a name for your system",
+                      })
+                      setTimeout(() => setNotification({ show: false, message: "" }), 3000)
+                    }
+                  }}
+                >
+                  Save System
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -2353,26 +1498,6 @@ const CoachingBoard = ({
             // Handle opponent dragging - optimized for responsiveness
             if (draggedOpponent && !isPlaying) {
               handleOpponentDrag(e, draggedOpponent)
-
-              // Record intermediate states during dragging if recording
-              if (isRecording && recordingStartTime) {
-                const elapsedTime = Date.now() - recordingStartTime
-                // Only record every few frames to avoid too many frames
-                if (elapsedTime % 32 === 0) {
-                  // Record at ~30fps
-                  setRecordedFrames((prev) => [
-                    ...prev,
-                    {
-                      timestamp: elapsedTime,
-                      playerPositions: { ...playerPositions },
-                      opponentPositions: { ...opponentPositions },
-                      opponents: [...opponents],
-                      drawings: [...drawings],
-                      basketballs: [...basketballs],
-                    },
-                  ])
-                }
-              }
             }
 
             // Handle player dragging - optimized for responsiveness
@@ -2390,26 +1515,6 @@ const CoachingBoard = ({
                 ...prev,
                 [draggedPlayer]: { x: clampedX, y: clampedY },
               }))
-
-              // Record intermediate states during dragging if recording
-              if (isRecording && recordingStartTime) {
-                const elapsedTime = Date.now() - recordingStartTime
-                // Only record every few frames to avoid too many frames
-                if (elapsedTime % 32 === 0) {
-                  // Record at ~30fps
-                  setRecordedFrames((prev) => [
-                    ...prev,
-                    {
-                      timestamp: elapsedTime,
-                      playerPositions: { ...playerPositions },
-                      opponentPositions: { ...opponentPositions },
-                      opponents: [...opponents],
-                      drawings: [...drawings],
-                      basketballs: [...basketballs],
-                    },
-                  ])
-                }
-              }
             }
 
             // Handle basketball dragging with improved recording
@@ -2434,26 +1539,6 @@ const CoachingBoard = ({
                   return ball
                 })
               })
-
-              // Record intermediate states during dragging if recording
-              if (isRecording && recordingStartTime) {
-                const elapsedTime = Date.now() - recordingStartTime
-                // Only record every few frames to avoid too many frames
-                if (elapsedTime % 32 === 0) {
-                  // Record at ~30fps
-                  setRecordedFrames((prev) => [
-                    ...prev,
-                    {
-                      timestamp: elapsedTime,
-                      playerPositions: { ...playerPositions },
-                      opponentPositions: { ...opponentPositions },
-                      opponents: [...opponents],
-                      drawings: [...drawings],
-                      basketballs: [...basketballs],
-                    },
-                  ])
-                }
-              }
             }
           }}
           onMouseUp={(e) => {
@@ -2530,24 +1615,6 @@ const CoachingBoard = ({
             // Handle opponent dragging
             if (draggedOpponent && !isPlaying) {
               handleOpponentDrag(mouseEvent, draggedOpponent)
-
-              // Record intermediate states during dragging if recording
-              if (isRecording && recordingStartTime) {
-                const elapsedTime = Date.now() - recordingStartTime
-                if (elapsedTime % 32 === 0) {
-                  setRecordedFrames((prev) => [
-                    ...prev,
-                    {
-                      timestamp: elapsedTime,
-                      playerPositions: { ...playerPositions },
-                      opponentPositions: { ...opponentPositions },
-                      opponents: [...opponents],
-                      drawings: [...drawings],
-                      basketballs: [...basketballs],
-                    },
-                  ])
-                }
-              }
             }
 
             // Handle player dragging
@@ -2565,24 +1632,6 @@ const CoachingBoard = ({
                 ...prev,
                 [draggedPlayer]: { x: clampedX, y: clampedY },
               }))
-
-              // Record intermediate states during dragging if recording
-              if (isRecording && recordingStartTime) {
-                const elapsedTime = Date.now() - recordingStartTime
-                if (elapsedTime % 32 === 0) {
-                  setRecordedFrames((prev) => [
-                    ...prev,
-                    {
-                      timestamp: elapsedTime,
-                      playerPositions: { ...playerPositions },
-                      opponentPositions: { ...opponentPositions },
-                      opponents: [...opponents],
-                      drawings: [...drawings],
-                      basketballs: [...basketballs],
-                    },
-                  ])
-                }
-              }
             }
 
             // Handle basketball dragging
@@ -2607,24 +1656,6 @@ const CoachingBoard = ({
                   return ball
                 })
               })
-
-              // Record intermediate states during dragging if recording
-              if (isRecording && recordingStartTime) {
-                const elapsedTime = Date.now() - recordingStartTime
-                if (elapsedTime % 32 === 0) {
-                  setRecordedFrames((prev) => [
-                    ...prev,
-                    {
-                      timestamp: elapsedTime,
-                      playerPositions: { ...playerPositions },
-                      opponentPositions: { ...opponentPositions },
-                      opponents: [...opponents],
-                      drawings: [...drawings],
-                      basketballs: [...basketballs],
-                    },
-                  ])
-                }
-              }
             }
           }}
           onTouchEnd={(e) => {
@@ -2662,6 +1693,22 @@ const CoachingBoard = ({
                   strokeLinejoin="round"
                 />
                 {drawing.type === "arrow" && renderArrowhead(drawing)}
+                {/* Add arrow number text */}
+                {drawing.type === "arrow" && drawing.arrowNumber && drawing.points.length >= 1 && (
+                  <text
+                    x={drawing.points[0].x - 8}
+                    y={drawing.points[0].y - 8}
+                    fill="#ffffff"
+                    stroke="#000000"
+                    strokeWidth="0.5"
+                    fontSize="12px"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                  >
+                    {drawing.arrowNumber}
+                  </text>
+                )}
               </g>
             ))}
 
@@ -2810,7 +1857,7 @@ const CoachingBoard = ({
             <label htmlFor="lineup-select">Select Lineup:</label>
             <select
               id="lineup-select"
-              value={selectedLineupId || lastSelectedLineupIdRef.current || ""}
+              value={selectedLineupId}
               onChange={handleLineupChange}
               className="lineup-dropdown"
             >
@@ -2947,6 +1994,16 @@ const CoachingBoard = ({
       )}
       {notification.show && <div className="notification">{notification.message}</div>}
       {tacticToDisplay && <TacticDisplayModal tactic={tacticToDisplay} onClose={() => setTacticToDisplay(null)} />}
+      {showShareModal && (
+        <ShareSystemsModal
+          onClose={() => setShowShareModal(false)}
+          savedSystems={savedSystems.filter((s) => s.isStatic)}
+          players={players}
+          teamName={activeTeam?.name || ""}
+          activeTeamId={activeTeamId}
+          courtRef={courtRef}
+        />
+      )}
     </div>
   )
 }

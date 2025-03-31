@@ -12,6 +12,8 @@ import useScreenOrientation from "@/hooks/useScreenOrientation"
 import ProgressBar from "./ProgressBar"
 import ExpandableMenu from "./ExpandableMenu"
 import TeamSetup from "./TeamSetup"
+import HowItWorksButton from "./HowItWorksButton"
+import HowItWorksModal from "./HowItWorksModal"
 
 // Create context for global state management
 export const AppContext = createContext(null)
@@ -39,6 +41,7 @@ export default function App() {
   const [showLineupModal, setShowLineupModal] = useState(false)
   const [showTacticModal, setShowTacticModal] = useState(false)
   const [showPlayerStatsModal, setShowPlayerStatsModal] = useState(false)
+  const [showHowItWorksModal, setShowHowItWorksModal] = useState(false)
 
   // Get active team
   const activeTeam = teams.find((team) => team.id === activeTeamId) || null
@@ -194,6 +197,9 @@ export default function App() {
                 </select>
               </div>
             )}
+
+            {/* Add the How It Works button */}
+            <HowItWorksButton onClick={() => setShowHowItWorksModal(true)} />
           </div>
         </header>
 
@@ -220,8 +226,10 @@ export default function App() {
         {showPlayerStatsModal && selectedPlayerForStats && (
           <PlayerStatsModal player={selectedPlayerForStats} onClose={() => setShowPlayerStatsModal(false)} />
         )}
+        {showHowItWorksModal && <HowItWorksModal onClose={() => setShowHowItWorksModal(false)} />}
       </div>
     </AppContext.Provider>
   )
 }
+
 
