@@ -635,6 +635,7 @@
   box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.3);
 }
 
+/* Add styles for the system type selector in the save form */
 .system-category-selector {
   display: flex;
   gap: 0.5rem;
@@ -661,6 +662,13 @@
   border-color: var(--teal);
   color: white;
   box-shadow: 0 0 0 2px rgba(41, 161, 156, 0.3);
+}
+
+/* Style for offense button when selected */
+.category-button.selected:first-child {
+  background-color: var(--orange);
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px rgba(226, 125, 96, 0.3);
 }
 
 .form-actions {
@@ -1756,6 +1764,7 @@
   z-index: 100;
 }
 
+/* Update the systems dropdown styling */
 .systems-section {
   margin-bottom: 10px;
 }
@@ -1768,16 +1777,36 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Add specific styling for offense and defense headers */
+.systems-section:first-child .systems-section-header {
+  border-left: 3px solid var(--orange);
+}
+
+.systems-section:last-child .systems-section-header {
+  border-left: 3px solid var(--teal);
+}
+
 .systems-list {
   max-height: 150px;
   overflow-y: auto;
 }
 
+/* Style system items based on type */
 .system-item {
   display: flex;
   flex-direction: column;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid transparent;
+}
+
+/* Add visual indicators for system types */
+.systems-section:first-child .system-item {
+  border-left-color: var(--orange);
+}
+
+.systems-section:last-child .system-item {
+  border-left-color: var(--teal);
 }
 
 .system-name {
@@ -1791,6 +1820,32 @@
   justify-content: flex-end;
   gap: 0.5rem;
   align-items: center;
+}
+
+/* Style the load button differently based on system type */
+.systems-section:first-child .system-action-button {
+  background-color: var(--orange);
+}
+
+.systems-section:first-child .system-action-button:hover {
+  background-color: var(--orange-dark);
+}
+
+.systems-section:last-child .system-action-button {
+  background-color: var(--teal);
+}
+
+.systems-section:last-child .system-action-button:hover {
+  background-color: var(--teal-dark);
+}
+
+/* Keep delete button styling consistent */
+.system-action-button.delete {
+  background-color: #d32f2f !important;
+}
+
+.system-action-button.delete:hover {
+  background-color: #b71c1c !important;
 }
 
 .system-action-button {
@@ -1965,6 +2020,127 @@
     margin-top: 0.5rem;
     width: 100%;
   }
+}
+
+/* System Type Selector Styles */
+.system-type-selector {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.system-type-button {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #e67e22;
+  background-color: #e67e22;
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-size: 14px;
+}
+
+.system-type-button:hover {
+  background-color: #d35400;
+  border-color: #d35400;
+}
+
+.system-type-button.selected {
+  background-color: #2980b9;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.3);
+}
+
+/* Make sure the form is responsive */
+@media (max-width: 480px) {
+  .system-save-form {
+    width: 90%;
+    max-width: 320px;
+    padding: 15px;
+  }
+
+  .system-type-selector {
+    flex-direction: row;
+  }
+
+  .system-type-button {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* Improve the overall form styling */
+.system-save-form {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.system-save-form h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 18px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #555;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.action-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.action-button:first-child {
+  background-color: #f1f1f1;
+  color: #555;
+}
+
+.action-button:first-child:hover {
+  background-color: #e0e0e0;
+}
+
+.action-button:last-child {
+  background-color: #e67e22;
+  color: white;
+}
+
+.action-button:last-child:hover {
+  background-color: #d35400;
 }
 
 

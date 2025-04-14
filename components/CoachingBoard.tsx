@@ -34,6 +34,9 @@ const CoachingBoard = ({
   // Add these after the other state declarations (around line 40-50)
   const [showSavedSystemsDropdown, setShowSavedSystemsDropdown] = useState(false)
   const [staticSystemName, setStaticSystemName] = useState("")
+  // Update the state variables to include system type
+  // Add this after the staticSystemName state declaration (around line 40-50)
+  const [systemType, setSystemType] = useState("offense") // Default to offense
   const [showStaticNamePrompt, setShowStaticNamePrompt] = useState(false)
   const [notification, setNotification] = useState({ show: false, message: "" })
 
@@ -96,13 +99,14 @@ const CoachingBoard = ({
       basketballs: savedSystemState.basketballs,
       isStatic: true,
       createdAt: new Date().toISOString(),
+      systemType: systemType, // Add the system type
     }
     setSavedSystems((prevSystems) => [...prevSystems, system])
 
     // Show success notification
     setNotification({
       show: true,
-      message: `System "${name}" saved successfully!`,
+      message: `${systemType === "offense" ? "Offensive" : "Defensive"} system "${name}" saved successfully!`,
     })
     setTimeout(() => setNotification({ show: false, message: "" }), 3000)
 
@@ -1190,6 +1194,8 @@ const CoachingBoard = ({
 
     // Set a flag to show the form
     setShowStaticNamePrompt(true)
+    // Reset to default type
+    setSystemType("offense")
   }
 
   return (
@@ -1347,20 +1353,20 @@ const CoachingBoard = ({
                 disabled={disabled || savedSystems.filter((s) => s.isStatic).length === 0}
               >
                 {savedSystems.filter((s) => s.isStatic).length > 0
-                  ? `Saved Systems (${savedSystems.filter((s) => s.isStatic).length})`
+                  ? `Saved Systems (${savedSystems.filter((s) => s.isStatic && s.systemType === "offense").length}O/${savedSystems.filter((s) => s.isStatic && s.systemType === "defense").length}D)`
                   : "Saved Systems"}
                 <span className="dropdown-arrow">▼</span>
               </button>
 
               {showSavedSystemsDropdown && (
                 <div className="dropdown-menu systems-dropdown">
-                  {/* Static Systems */}
+                  {/* Offensive Systems */}
                   <div className="systems-section">
-                    <div className="systems-section-header">Static Systems</div>
+                    <div className="systems-section-header">Offensive Systems</div>
                     <div className="systems-list">
-                      {savedSystems.filter((s) => s.isStatic).length > 0 ? (
+                      {savedSystems.filter((s) => s.isStatic && s.systemType === "offense").length > 0 ? (
                         savedSystems
-                          .filter((s) => s.isStatic)
+                          .filter((s) => s.isStatic && s.systemType === "offense")
                           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                           .map((system) => (
                             <div key={system.id} className="system-item">
@@ -1387,12 +1393,48 @@ const CoachingBoard = ({
                             </div>
                           ))
                       ) : (
-                        <div className="empty-systems-message">No static systems saved</div>
+                        <div className="empty-systems-message">No offensive systems saved</div>
                       )}
                     </div>
                   </div>
 
-                  {/* No Dynamic Systems Section */}
+                  {/* Defensive Systems */}
+                  <div className="systems-section">
+                    <div className="systems-section-header">Defensive Systems</div>
+                    <div className="systems-list">
+                      {savedSystems.filter((s) => s.isStatic && s.systemType === "defense").length > 0 ? (
+                        savedSystems
+                          .filter((s) => s.isStatic && s.systemType === "defense")
+                          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                          .map((system) => (
+                            <div key={system.id} className="system-item">
+                              <span className="system-name">{system.name}</span>
+                              <div className="system-actions">
+                                <button
+                                  className="system-action-button"
+                                  onClick={() => {
+                                    loadSystem(system)
+                                    setShowSavedSystemsDropdown(false)
+                                  }}
+                                >
+                                  Load
+                                </button>
+                                <button
+                                  className="system-action-button delete"
+                                  onClick={() => {
+                                    deleteSystem(system.id)
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                      ) : (
+                        <div className="empty-systems-message">No defensive systems saved</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -1402,7 +1444,7 @@ const CoachingBoard = ({
         {showStaticNamePrompt && (
           <div className="system-save-overlay">
             <div className="system-save-form">
-              <h3>Save Static System</h3>
+              <h3>Save System</h3>
               <div className="form-group">
                 <label htmlFor="staticSystemName">System Name</label>
                 <input
@@ -1413,6 +1455,25 @@ const CoachingBoard = ({
                   placeholder="Enter a name for this system"
                   autoComplete="off"
                 />
+              </div>
+              <div className="form-group">
+                <label>System Type</label>
+                <div className="system-type-selector">
+                  <button
+                    type="button"
+                    className={`system-type-button ${systemType === "offense" ? "selected" : ""}`}
+                    onClick={() => setSystemType("offense")}
+                  >
+                    Offense
+                  </button>
+                  <button
+                    type="button"
+                    className={`system-type-button ${systemType === "defense" ? "selected" : ""}`}
+                    onClick={() => setSystemType("defense")}
+                  >
+                    Defense
+                  </button>
+                </div>
               </div>
               <div className="form-actions">
                 <button
@@ -1451,6 +1512,7 @@ const CoachingBoard = ({
                         basketballs: savedSystemState.basketballs,
                         isStatic: true,
                         createdAt: new Date().toISOString(),
+                        systemType: systemType, // Include the system type
                       }
 
                       // Add to saved systems
@@ -1459,14 +1521,14 @@ const CoachingBoard = ({
                       // Show success notification
                       setNotification({
                         show: true,
-                        message: `System "${staticSystemName}" saved successfully!`,
+                        message: `${systemType === "offense" ? "Offensive" : "Defensive"} system "${staticSystemName}" saved successfully!`,
                       })
                       setTimeout(() => setNotification({ show: false, message: "" }), 3000)
 
                       // Clear the system name and close the form
                       setStaticSystemName("")
                       setShowStaticNamePrompt(false)
-                      setSavedSystemState(null)
+                      setSavedSystemState(null) // Clear saved state after successful save
                     } else {
                       // Show error if no name provided
                       setNotification({
